@@ -13,11 +13,11 @@ a throwaway graph copy and scored; the sort key below is the whole policy:
 
 from pydantic import BaseModel
 
-from bragent.graph import queries
-from bragent.graph.client import graph_copy
-from bragent.models import BlastRadius, EdgeRef, GraphPath, RemediationPlan
-from bragent.scoring import blast_radius
-from bragent.scoring.paths import escalation_paths, exploit_node_ids
+from severance.graph import queries
+from severance.graph.client import graph_copy
+from severance.models import BlastRadius, EdgeRef, GraphPath, RemediationPlan
+from severance.scoring import blast_radius
+from severance.scoring.paths import escalation_paths, exploit_node_ids
 
 ACTION_FOR_EDGE = {
     "CAN_ASSUME": "revoke_assume",

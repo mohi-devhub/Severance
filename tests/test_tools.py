@@ -5,10 +5,10 @@ import json
 
 import pytest
 
-from bragent.agent import tools
-from bragent.audit.log import AuditLog
-from bragent.graph import queries
-from bragent.models import Approval
+from severance.agent import tools
+from severance.audit.log import AuditLog
+from severance.graph import queries
+from severance.models import Approval
 
 pytestmark = pytest.mark.graph
 BY_NAME = {t.name: t.handler for t in tools.TOOLS}

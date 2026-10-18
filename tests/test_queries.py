@@ -1,8 +1,8 @@
 import pytest
 from conftest import ALL_SCENARIOS
 
-from bragent.graph import queries as q
-from bragent.models import EdgeRef
+from severance.graph import queries as q
+from severance.models import EdgeRef
 
 pytestmark = pytest.mark.graph
 
@@ -17,7 +17,7 @@ def test_find_reachers_escalation(seeded):
 
 
 def test_get_resource_by_name():
-    seed_truth = __import__("bragent.graph.seeder", fromlist=["seed"]).seed("escalation_chain")
+    seed_truth = __import__("severance.graph.seeder", fromlist=["seed"]).seed("escalation_chain")
     res = q.get_resource_by_name("prod-db")
     assert res.id == seed_truth.target_resource_id and res.sensitivity == "critical"
     assert q.get_resource_by_name("nope") is None

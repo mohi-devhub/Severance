@@ -5,10 +5,10 @@ All data goes in through params. The only inlined values are code constants
 as a parameter in a var-length pattern (docs/04 §2).
 """
 
-from bragent.config import settings
-from bragent.graph.client import copy_graph, drop_graph, run_ro, run_rw  # noqa: F401
-from bragent.graph.schema import REACH_EDGES
-from bragent.models import EDGE_TYPES, Broker, EdgeRef, GraphPath, NodeRef, Reacher, ResourceRow
+from severance.config import settings
+from severance.graph.client import copy_graph, drop_graph, run_ro, run_rw  # noqa: F401
+from severance.graph.schema import REACH_EDGES
+from severance.models import EDGE_TYPES, Broker, EdgeRef, GraphPath, NodeRef, Reacher, ResourceRow
 
 _NODE = "[n.id, labels(n)[0], coalesce(n.name, n.id), coalesce(n.kind, n.type, n.trust)]"
 

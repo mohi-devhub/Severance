@@ -1,7 +1,7 @@
 """Escalation paths: the primary (shortest) path and every external entry point."""
 
-from bragent.graph import queries
-from bragent.models import GraphPath
+from severance.graph import queries
+from severance.models import GraphPath
 
 BROKER_LABELS = ("Role", "Policy")
 

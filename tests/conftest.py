@@ -1,6 +1,6 @@
 import pytest
 
-from bragent.config import settings
+from severance.config import settings
 
 settings.graph_name = "iam_test"
 settings.audit_dir = "audit/test"
@@ -8,7 +8,7 @@ settings.audit_dir = "audit/test"
 
 def _db_up() -> bool:
     try:
-        from bragent.graph.client import db
+        from severance.graph.client import db
 
         return db().connection.ping()
     except Exception:
@@ -26,7 +26,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture
 def seeded(request):
     """Seed the test graph with a scenario (param = scenario name) → ScenarioTruth."""
-    from bragent.graph.seeder import seed
+    from severance.graph.seeder import seed
 
     return seed(request.param)
 

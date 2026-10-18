@@ -1,6 +1,6 @@
 """Full agent loop through the Claude Agent SDK. Needs the Claude API.
 
-Runs when ANTHROPIC_API_KEY is set or BRAGENT_RUN_AGENT=1 (e.g. a logged-in Claude Code).
+Runs when ANTHROPIC_API_KEY is set or SEVERANCE_RUN_AGENT=1 (e.g. a logged-in Claude Code).
 """
 
 import asyncio
@@ -8,15 +8,15 @@ import os
 
 import pytest
 
-from bragent.agent import runner
-from bragent.graph import queries
-from bragent.models import Approval
+from severance.agent import runner
+from severance.graph import queries
+from severance.models import Approval
 
 pytestmark = [
     pytest.mark.graph,
     pytest.mark.agent,
     pytest.mark.skipif(
-        not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("BRAGENT_RUN_AGENT")),
+        not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("SEVERANCE_RUN_AGENT")),
         reason="no Claude API credentials",
     ),
 ]
@@ -28,8 +28,8 @@ def _approver(ok: bool):
 
 def _numbers_match_graph(records, truth):
     """No fabricated numbers: every audited before-number matches a direct query on a reseed."""
-    from bragent.graph.seeder import seed
-    from bragent.scoring import blast_radius
+    from severance.graph.seeder import seed
+    from severance.scoring import blast_radius
 
     seed(truth.name)
     direct = blast_radius.compute(truth.target_resource_id)

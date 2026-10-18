@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import pytest
 from redis.exceptions import ResponseError
 
-from bragent.graph import client
+from severance.graph import client
 
 
 def test_copy_waits_for_background_save(monkeypatch):

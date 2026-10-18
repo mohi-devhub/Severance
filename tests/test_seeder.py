@@ -1,9 +1,9 @@
 import pytest
 from conftest import ALL_SCENARIOS
 
-from bragent.graph import queries as q
-from bragent.graph.client import graph_copy
-from bragent.graph.seeder import seed
+from severance.graph import queries as q
+from severance.graph.client import graph_copy
+from severance.graph.seeder import seed
 
 pytestmark = pytest.mark.graph
 

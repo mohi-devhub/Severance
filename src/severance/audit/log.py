@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from bragent.config import settings
-from bragent.models import BlastRadius, DryRunResult, RemediationPlan
+from severance.config import settings
+from severance.models import BlastRadius, DryRunResult, RemediationPlan
 
 # steps that describe or perform a mutation must carry the path that justified them
 JUSTIFIED_STEPS = {"propose_remediation", "apply_remediation"}

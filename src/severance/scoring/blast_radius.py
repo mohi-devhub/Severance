@@ -1,9 +1,9 @@
 """Blast-radius metric and severity formula (docs/05). Pure over query results."""
 
-from bragent.config import settings
-from bragent.graph import queries
-from bragent.models import BlastRadius, Broker, GraphPath, Reacher
-from bragent.scoring.paths import escalation_paths, exploit_node_ids
+from severance.config import settings
+from severance.graph import queries
+from severance.models import BlastRadius, Broker, GraphPath, Reacher
+from severance.scoring.paths import escalation_paths, exploit_node_ids
 
 SENSITIVITY_WEIGHT = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 

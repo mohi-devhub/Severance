@@ -57,42 +57,6 @@ wheels = [
 ]
 
 [[package]]
-name = "bragent"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "claude-agent-sdk" },
-    { name = "falkordb" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "rich" },
-    { name = "typer" },
-]
-
-[package.optional-dependencies]
-bench = [
-    { name = "matplotlib" },
-]
-dev = [
-    { name = "pytest" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "claude-agent-sdk", specifier = ">=0.2.140" },
-    { name = "falkordb" },
-    { name = "matplotlib", marker = "extra == 'bench'" },
-    { name = "pydantic", specifier = ">=2" },
-    { name = "pydantic-settings" },
-    { name = "pytest", marker = "extra == 'dev'" },
-    { name = "rich" },
-    { name = "ruff", marker = "extra == 'dev'" },
-    { name = "typer" },
-]
-provides-extras = ["dev", "bench"]
-
-[[package]]
 name = "cffi"
 version = "2.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1656,6 +1620,42 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/2e/da3d9589bae8e8b58f3a48bd5bc0b980232fb14a83bf02c3be7660f87c1b/ruff-0.17.1-py3-none-win_amd64.whl", hash = "sha256:5df76f16580fab58d0f6c98a3ac254a4abceb7b2489b8b678335869cff77b3d7", size = 10097955, upload-time = "2026-10-15T15:23:13.309Z" },
     { url = "https://files.pythonhosted.org/packages/df/c9/0f2a4dea06a5e12c1191ee3d96b1e1233797d0d5e18f97a2b909a95a9836/ruff-0.17.1-py3-none-win_arm64.whl", hash = "sha256:42400b9a6ff8515ff27796f07f92e0195be011c86e81e381606f58ea5502fef4", size = 9853542, upload-time = "2026-10-15T15:23:16.05Z" },
 ]
+
+[[package]]
+name = "severance"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "claude-agent-sdk" },
+    { name = "falkordb" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "rich" },
+    { name = "typer" },
+]
+
+[package.optional-dependencies]
+bench = [
+    { name = "matplotlib" },
+]
+dev = [
+    { name = "pytest" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "claude-agent-sdk", specifier = ">=0.2.140" },
+    { name = "falkordb" },
+    { name = "matplotlib", marker = "extra == 'bench'" },
+    { name = "pydantic", specifier = ">=2" },
+    { name = "pydantic-settings" },
+    { name = "pytest", marker = "extra == 'dev'" },
+    { name = "rich" },
+    { name = "ruff", marker = "extra == 'dev'" },
+    { name = "typer" },
+]
+provides-extras = ["dev", "bench"]
 
 [[package]]
 name = "shellingham"

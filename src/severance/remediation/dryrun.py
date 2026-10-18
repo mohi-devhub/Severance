@@ -1,10 +1,10 @@
 """Measure a plan on a throwaway copy of the graph; the live graph is never touched."""
 
-from bragent.graph import queries
-from bragent.graph.client import graph_copy
-from bragent.models import DryRunResult, RemediationPlan
-from bragent.scoring import blast_radius
-from bragent.scoring.paths import escalation_paths
+from severance.graph import queries
+from severance.graph.client import graph_copy
+from severance.models import DryRunResult, RemediationPlan
+from severance.scoring import blast_radius
+from severance.scoring.paths import escalation_paths
 
 
 def simulate(plan: RemediationPlan) -> DryRunResult:

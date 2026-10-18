@@ -17,11 +17,11 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from bragent.config import settings
-from bragent.graph import queries
-from bragent.graph.client import run_ro, use_graph
-from bragent.graph.seeder import SCENARIOS, ScenarioTruth, seed
-from bragent.remediation import dryrun, planner
+from severance.config import settings
+from severance.graph import queries
+from severance.graph.client import run_ro, use_graph
+from severance.graph.seeder import SCENARIOS, ScenarioTruth, seed
+from severance.remediation import dryrun, planner
 
 RESULTS = Path("results")
 BENCH_GRAPH = "iam_bench"

@@ -8,7 +8,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 /audit/
-src/bragent/agent/system_prompt.txt
+src/severance/agent/system_prompt.txt
 dist/
 node_modules/
 .hyperframes/

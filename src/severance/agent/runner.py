@@ -12,11 +12,11 @@ from claude_agent_sdk import (
 )
 from pydantic import BaseModel
 
-from bragent.agent import tools
-from bragent.agent.prompts import SYSTEM_PROMPT, render_finding_prompt
-from bragent.audit.log import AuditLog
-from bragent.config import settings
-from bragent.models import Finding
+from severance.agent import tools
+from severance.agent.prompts import SYSTEM_PROMPT, render_finding_prompt
+from severance.audit.log import AuditLog
+from severance.config import settings
+from severance.models import Finding
 
 
 class RunResult(BaseModel):

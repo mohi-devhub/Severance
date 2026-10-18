@@ -14,7 +14,7 @@ from typing import Any
 from falkordb import FalkorDB
 from redis.exceptions import ResponseError
 
-from bragent.config import settings
+from severance.config import settings
 
 _db: FalkorDB | None = None
 _active: ContextVar[str | None] = ContextVar("active_graph", default=None)

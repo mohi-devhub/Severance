@@ -1,4 +1,4 @@
-"""`bragent` CLI: operator interface and demo driver (docs/08)."""
+"""`severance` CLI: operator interface and demo driver (docs/08)."""
 
 import asyncio
 import json
@@ -13,12 +13,16 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-from bragent.audit.log import summary
-from bragent.graph import queries
-from bragent.graph.seeder import SCENARIOS, seed
-from bragent.models import Approval, DryRunResult, Finding, RemediationPlan
+from severance.audit.log import summary
+from severance.graph import queries
+from severance.graph.seeder import SCENARIOS, seed
+from severance.models import Approval, DryRunResult, Finding, RemediationPlan
 
-app = typer.Typer(no_args_is_help=True, add_completion=False)
+app = typer.Typer(
+    no_args_is_help=True,
+    add_completion=False,
+    help="Severance: graph-backed cloud IAM investigation and remediation.",
+)
 console = Console()
 
 
@@ -152,7 +156,7 @@ def auto_approver(plan: RemediationPlan, dr: DryRunResult) -> Approval:
 
 
 def _investigate(finding: Finding, auto_approve: bool, verbose: bool) -> None:
-    from bragent.agent import runner
+    from severance.agent import runner
 
     console.print("▶ Investigating with the agent …")
 
@@ -162,7 +166,7 @@ def _investigate(finding: Finding, auto_approve: bool, verbose: bool) -> None:
 
     approver = auto_approver if auto_approve else interactive_approver
     if not auto_approve and not sys.stdin.isatty():
-        from bragent.agent.tools import reject_all
+        from severance.agent.tools import reject_all
 
         approver = reject_all
         console.print("Non-interactive input: remediation approval defaults to rejection.")
@@ -255,7 +259,7 @@ def benchmark(
     resume: bool = typer.Option(False, help="resume saved baseline calls with matching options"),
 ) -> None:
     """Correctness table, engine vs tool-less LLM, and the scale plot → results/."""
-    from bragent.bench import run_all
+    from severance.bench import run_all
 
     if resume and not llm_runs:
         raise typer.BadParameter("--resume requires --llm-runs greater than zero")

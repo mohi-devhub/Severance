@@ -16,12 +16,12 @@ from typing import Any
 
 from claude_agent_sdk import create_sdk_mcp_server, tool
 
-from bragent.audit.log import AuditLog, plan_fields, summary
-from bragent.graph import queries
-from bragent.models import Approval, DryRunResult, Finding, RemediationPlan
-from bragent.remediation import apply, dryrun, planner
-from bragent.scoring import blast_radius
-from bragent.scoring.paths import escalation_paths, exploit_node_ids
+from severance.audit.log import AuditLog, plan_fields, summary
+from severance.graph import queries
+from severance.models import Approval, DryRunResult, Finding, RemediationPlan
+from severance.remediation import apply, dryrun, planner
+from severance.scoring import blast_radius
+from severance.scoring.paths import escalation_paths, exploit_node_ids
 
 Approver = Callable[[RemediationPlan, DryRunResult], Approval]
 

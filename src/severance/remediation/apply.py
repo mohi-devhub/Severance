@@ -9,9 +9,9 @@ import hashlib
 import uuid
 from typing import Any, Literal
 
-from bragent.audit.log import AuditLog, plan_fields
-from bragent.graph import queries
-from bragent.models import DryRunResult, RemediationPlan
+from severance.audit.log import AuditLog, plan_fields
+from severance.graph import queries
+from severance.models import DryRunResult, RemediationPlan
 
 _issued: dict[str, str] = {}
 

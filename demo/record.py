@@ -15,7 +15,7 @@ import time
 from datetime import UTC, datetime
 from pathlib import Path
 
-from bragent.config import settings
+from severance.config import settings
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "demo"
@@ -35,7 +35,7 @@ def main() -> None:
     }
     with tempfile.TemporaryFile(mode="w+") as stderr:
         process = subprocess.Popen(
-            [sys.executable, "-m", "bragent.cli.main", "demo"],
+            [sys.executable, "-m", "severance.cli.main", "demo"],
             cwd=ROOT,
             env=env,
             stdout=subprocess.PIPE,
@@ -67,7 +67,7 @@ def main() -> None:
         "kind": "actual_cli_capture",
         "started_at": started.isoformat(),
         "model": settings.model,
-        "command": "GRAPH_NAME=iam_demo .venv/bin/bragent demo",
+        "command": "GRAPH_NAME=iam_demo .venv/bin/severance demo",
         "approval": "Explicit demo auto-approval on synthetic data",
         "duration_seconds": round(time.monotonic() - clock, 3),
         "events": events,

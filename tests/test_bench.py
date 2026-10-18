@@ -8,9 +8,9 @@ import pytest
 from claude_agent_sdk import ResultMessage
 from typer.testing import CliRunner
 
-from bragent import bench
-from bragent.cli.main import app
-from bragent.models import EdgeRef
+from severance import bench
+from severance.cli.main import app
+from severance.models import EdgeRef
 
 
 @pytest.fixture
@@ -242,7 +242,7 @@ def test_cli_rejects_invalid_benchmark_options(args):
 @pytest.mark.graph
 @pytest.mark.parametrize("scenario", list(bench.SCENARIOS))
 def test_scale10_engine_matches_planted_truth(scenario):
-    from bragent.graph.client import use_graph
+    from severance.graph.client import use_graph
 
     with use_graph("iam_test_bench_scale10"):
         try:

@@ -1,8 +1,8 @@
 """Pure-function scoring tests: canned rows, no DB."""
 
-from bragent.models import BlastRadius, GraphPath, NodeRef, Reacher
-from bragent.scoring import blast_radius as br
-from bragent.scoring.paths import exploit_node_ids
+from severance.models import BlastRadius, GraphPath, NodeRef, Reacher
+from severance.scoring import blast_radius as br
+from severance.scoring.paths import exploit_node_ids
 
 
 def _r(pid: str, kind: str, hops: int) -> Reacher:

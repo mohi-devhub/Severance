@@ -1,10 +1,10 @@
 """System prompt and the finding → first-message renderer."""
 
-from bragent.config import settings
-from bragent.models import Finding
+from severance.config import settings
+from severance.models import Finding
 
 SYSTEM_PROMPT = f"""\
-You are a cloud-security remediation agent operating over an IAM graph.
+You are Severance, a cloud-security remediation agent operating over an IAM graph.
 
 Non-negotiable rules:
 - You never state a reachability fact, path, count, or score that did not come

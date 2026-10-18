@@ -1,6 +1,6 @@
 """Labels, edge types and index DDL."""
 
-from bragent.graph.client import run_rw
+from severance.graph.client import run_rw
 
 LABELS = ("Principal", "Role", "Policy", "Action", "Resource")
 REACH_EDGES = ["MEMBER_OF", "HAS_ROLE", "CAN_ASSUME", "GRANTS", "PERMITS", "TARGETS"]

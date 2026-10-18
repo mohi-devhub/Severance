@@ -1,7 +1,7 @@
 [project]
-name = "bragent"
+name = "severance"
 version = "0.1.0"
-description = "Autonomous cloud IAM blast-radius remediation agent"
+description = "Severance: graph-backed cloud IAM investigation and remediation"
 requires-python = ">=3.11"
 dependencies = [
   "claude-agent-sdk>=0.2.140",
@@ -17,7 +17,7 @@ dev = ["pytest", "ruff"]
 bench = ["matplotlib"]
 
 [project.scripts]
-bragent = "bragent.cli.main:app"
+severance = "severance.cli.main:app"
 
 [build-system]
 requires = ["hatchling"]

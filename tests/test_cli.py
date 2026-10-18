@@ -1,7 +1,7 @@
 import pytest
 from typer.testing import CliRunner
 
-from bragent.cli.main import app
+from severance.cli.main import app
 
 pytestmark = pytest.mark.graph
 cli = CliRunner()
@@ -19,7 +19,7 @@ def test_investigate_needs_one_source():
 
 
 def test_noninteractive_investigation_rejects_by_default(monkeypatch):
-    from bragent.agent import runner, tools
+    from severance.agent import runner, tools
 
     async def fake_run(finding, *, approver, **kwargs):
         assert approver is tools.reject_all

@@ -1,6 +1,6 @@
-# Graph Hacks submission notes
+# Severance — Graph Hacks submission notes
 
-**Project:** BlastRadius Agent (repository: Severance)
+**Project:** Severance
 
 **Team:** pied-piper
 
@@ -8,63 +8,52 @@
 
 ## Project description
 
-BlastRadius Agent investigates synthetic cloud IAM security findings using FalkorDB as
-its operational context. A Claude agent selects typed MCP tools to find external
-reachers, trace multi-hop privilege-escalation paths, and rank load-bearing roles and
-policies. A deterministic planner evaluates candidate edge cuts on server-side graph
-copies. The chosen fix is simulated, presented for approval, and applied only with a
-single-use consent token. Every plan and mutation records its justifying graph path
-and measured before/after effects in an append-only audit trail.
+Severance investigates synthetic cloud IAM security findings using FalkorDB as its
+operational context. A Claude agent selects typed MCP tools to find external
+reachers, trace multi-hop privilege-escalation paths, and rank load-bearing roles
+and policies. A deterministic planner evaluates candidate edge cuts on server-side
+graph copies. The chosen fix is simulated, presented for approval, and applied only
+with a single-use consent token. Plans and mutations record the justifying graph
+path and measured before/after effects in an append-only audit trail.
 
-FalkorDB supplies the decisions: removing it removes reachability analysis, shortest
-paths, broker ranking, dry-runs, and remediation. The project uses synthetic data only.
+FalkorDB supplies the decisions: removing it removes reachability analysis,
+shortest paths, broker ranking, dry-runs, and remediation. All IAM data is synthetic.
 
-## Submission assets
+## Non-video submission requirements
 
-| Requirement | Location |
+| Requirement | Status and evidence |
 |---|---|
-| Source repository | https://github.com/mohi-devhub/Severance |
-| Track, setup, architecture, graph model and essential Cypher | [README](README.md) |
-| Working demo video | [90-second MP4](demo/blastradius-demo.mp4) |
-| Original terminal output | [Transcript](demo/transcript.txt) and [timestamped capture](demo/capture.json) |
-| Exact investigation and mutation evidence | [Recorded audit](demo/audit.jsonl) and [summary](demo/evidence.json) |
-| Larger baseline, model and raw answers | [Report](results/baseline_scale10.md), [metrics](results/baseline_scale10.json), [checkpoint](results/baseline_scale10.runs.json) |
-| Repeatable build and CI | `uv.lock`, pinned Docker image, [workflow](.github/workflows/ci.yml) |
-| AI coding disclosure | README → Scope and AI assistance |
+| Public source repository | [mohi-devhub/Severance](https://github.com/mohi-devhub/Severance), verified accessible without authentication. |
+| README graph map | [Node properties, all six relationships, and a diagram](README.md#graph-data-model) showing external escalation and legitimate internal access. |
+| Graph queries and algorithms | [Essential Cypher](README.md#queries-that-drive-the-agent) and [implementation](src/severance/graph/queries.py): read-only traversals, `algo.SPpaths`, seeded `algo.betweenness`, and graph copies. |
+| FalkorDB central to decisions | [Track 01 evidence](README.md#track-01-evidence), [planner](src/severance/remediation/planner.py), [dry-run](src/severance/remediation/dryrun.py), and [approval gate](src/severance/remediation/apply.py). |
+| Complete local setup | [README setup](README.md#run-it), `uv.lock`, and a pinned, health-checked multi-platform FalkorDB image. |
+| Named track and AI disclosure | README explicitly identifies Track 01 and [discloses AI assistance](README.md#scope-and-ai-assistance). |
+| Reproducible checks | [GitHub Actions](.github/workflows/ci.yml) runs lint, formatting, deterministic graph tests, and package builds. |
 
-The video is an annotated replay of an actual Sonnet 5.5 CLI run, with playback
-stretched for readability and no audio. The real capture lasted about 24 seconds.
-It explicitly uses the synthetic demo's auto-approval. Normal investigations ask a
-human to approve, and non-interactive input rejects by default. Its source composition
-and rebuilding instructions are in [demo/README.md](demo/README.md).
+## Verification
 
-## What has been verified
-
-- 86 deterministic tests passed against both the existing database and a fresh
-  container using the pinned FalkorDB image.
+- 86 deterministic tests passed against the existing database and a clean container.
 - Two real Sonnet agent tests passed: approve and apply; reject and preserve the graph.
 - Ruff lint and formatting checks passed.
-- Source distribution and wheel built; a clean environment installed the wheel,
-  loaded its system prompt and MCP server, and ran the CLI help.
+- Source and wheel packages build; an isolated environment can install the wheel and
+  load its system prompt, MCP server and CLI.
 - The 40-call scale-10 baseline completed without call failures. Sonnet found all
   expected paths; its exact fix-edge accuracy was 67.5%, versus 100% for the engine.
-  Alternative fix edges still closed the exposure; the metric checks edge ranking.
-- Video layout, runtime, motion and text contrast were checked before rendering.
+  Alternative cuts also closed exposure; this metric checks the declared edge ranking.
+  [Report](results/baseline_scale10.md), [metrics](results/baseline_scale10.json), and
+  [raw answers](results/baseline_scale10.runs.json) are included.
 
-## Before submitting on the event website
+## Event submission
 
-The repository is **private by the team leader's explicit choice**. The
-[official rules](https://www.wemakedevs.org/hackathons/falkordb/rules) require a
-**public source repository**, a demo video, setup and graph-model documentation,
-essential queries/algorithms, named tracks, and disclosure of AI assistance.
-The README and local setup satisfy the documentation/deployment requirements.
+The [official rules](https://www.wemakedevs.org/hackathons/falkordb/rules) require public
+source, graph-model and setup documentation, essential queries or algorithms, named
+tracks, disclosure of AI assistance, and a working demonstration.
 
-1. Change repository visibility to public when the team leader is ready.
-2. Upload `demo/blastradius-demo.mp4` to the submission form or a video host the form accepts.
-3. Enter the source link and **Track 01 — Agents That Act on Connected Data**.
-4. Include the AI assistance disclosure; review the demo and be prepared to explain
-   the graph schema, queries, ranking policy, approval gate and benchmark limitations.
-5. Confirm team membership before submitting; the event page says it cannot be changed afterward.
+Video recording and editing are handled by the project owner and are outside this
+update. Submit the source link, select **Track 01**, and provide the owner's working
+demonstration in the event form. Review the graph schema, queries, ranking policy,
+approval gate and benchmark limitations so the team can explain the implementation.
 
-The advertised deadline is October 18, 2026, 11:59 PM IST. Repository publication,
-video hosting and form submission are not performed by this preparation step.
+The advertised deadline is October 18, 2026, 11:59 PM IST. Form submission and
+certificate retrieval from the participant profile are handled by the project owner.

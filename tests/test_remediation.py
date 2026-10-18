@@ -1,8 +1,8 @@
 import pytest
 from conftest import ALL_SCENARIOS
 
-from bragent.models import EdgeRef
-from bragent.remediation import planner
+from severance.models import EdgeRef
+from severance.remediation import planner
 
 graph = pytest.mark.graph
 
@@ -51,8 +51,8 @@ def test_planner_not_hop1(seeded):
 
 @graph
 def test_planner_no_external_path():
-    from bragent.graph import queries
-    from bragent.graph.seeder import seed
+    from severance.graph import queries
+    from severance.graph.seeder import seed
 
     t = seed("public_bucket")
     queries.delete_edge(t.expected_fix_edge)
@@ -60,14 +60,14 @@ def test_planner_no_external_path():
 
 
 def _plan_and_dryrun(t):
-    from bragent.remediation import dryrun
+    from severance.remediation import dryrun
 
     plan = planner.choose(t.target_resource_id)
     return plan, dryrun.simulate(plan)
 
 
 def _snapshot(t):
-    from bragent.graph import queries
+    from severance.graph import queries
 
     return queries.graph_counts(), [
         r.principal.id for r in queries.find_reachers(t.target_resource_id)
@@ -90,8 +90,8 @@ def test_dryrun(seeded):
 @graph
 @pytest.mark.parametrize("seeded", ["escalation_chain"], indirect=True)
 def test_apply_without_token_refuses(seeded):
-    from bragent.audit.log import AuditLog
-    from bragent.remediation import apply
+    from severance.audit.log import AuditLog
+    from severance.remediation import apply
 
     before = _snapshot(seeded)
     plan, dr = _plan_and_dryrun(seeded)
@@ -108,9 +108,9 @@ def test_apply_without_token_refuses(seeded):
 @graph
 @pytest.mark.parametrize("seeded", ["escalation_chain"], indirect=True)
 def test_apply_with_token_deletes_exactly_the_edge(seeded):
-    from bragent.audit.log import AuditLog
-    from bragent.graph import queries
-    from bragent.remediation import apply
+    from severance.audit.log import AuditLog
+    from severance.graph import queries
+    from severance.remediation import apply
 
     counts = queries.graph_counts()
     plan, dr = _plan_and_dryrun(seeded)
@@ -138,9 +138,9 @@ def test_apply_with_token_deletes_exactly_the_edge(seeded):
 @graph
 @pytest.mark.parametrize("seeded", ["public_bucket"], indirect=True)
 def test_stale_apply_aborts(seeded):
-    from bragent.audit.log import AuditLog
-    from bragent.graph import queries
-    from bragent.remediation import apply
+    from severance.audit.log import AuditLog
+    from severance.graph import queries
+    from severance.remediation import apply
 
     plan, dr = _plan_and_dryrun(seeded)
     queries.delete_edge(plan.edge)  # graph drifts after the dry-run
@@ -150,7 +150,7 @@ def test_stale_apply_aborts(seeded):
 
 
 def test_audit_refuses_unjustified_mutation():
-    from bragent.audit.log import AuditLog
+    from severance.audit.log import AuditLog
 
     with pytest.raises(ValueError):
         AuditLog().record("apply_remediation", result="applied", justifying_path=[])

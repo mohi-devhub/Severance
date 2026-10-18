@@ -29,6 +29,6 @@ jobs:
       - run: uv run --locked ruff check .
       - run: uv run --locked ruff format --check .
       - name: Require the graph database
-        run: uv run --locked python -c 'from bragent.graph.client import db; assert db().connection.ping()'
+        run: uv run --locked python -c 'from severance.graph.client import db; assert db().connection.ping()'
       - run: uv run --locked pytest -q -m 'not agent'
       - run: uv build

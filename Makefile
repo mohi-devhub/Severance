@@ -7,16 +7,16 @@ setup:
 up:
 	docker compose up -d --wait
 seed:
-	$(BIN)bragent seed escalation_chain
+	$(BIN)severance seed escalation_chain
 demo:
-	$(BIN)bragent demo
+	$(BIN)severance demo
 test:
 	$(BIN)pytest -q -m 'not agent'
 test-agent:
-	BRAGENT_RUN_AGENT=1 $(BIN)pytest -q -m agent
+	SEVERANCE_RUN_AGENT=1 $(BIN)pytest -q -m agent
 lint:
 	$(BIN)ruff check . && $(BIN)ruff format --check .
 bench:
-	$(BIN)bragent benchmark
+	$(BIN)severance benchmark
 bench-engine:
-	$(BIN)bragent benchmark --llm-runs 0
+	$(BIN)severance benchmark --llm-runs 0

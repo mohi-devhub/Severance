@@ -1,4 +1,4 @@
-# BlastRadius build
+# Severance build
 
 - [x] Phase 0 scaffolding (FalkorDB on host port 6380; 6379 taken by local redis)
 - [x] Phase 1 graph layer: client, schema, queries, seeder (GRAPH.COPY verified on v4.22.1)
@@ -17,6 +17,7 @@
 - Failed calls are recorded independently; atomic per-call checkpoints support --resume.
 - CI, dependency lock, pinned multi-platform database image, health checks, wheel smoke test,
   graph-model/query docs, Track 01 evidence, and AI assistance disclosure are implemented.
-- Real CLI demo capture and redacted audit are included; a 90-second video accompanies them.
-- Submission steps remain with the team: make the repository public when ready (private by
-  explicit request), provide the video to the event form, and submit before the deadline.
+- The project, Python package and CLI are named Severance (`severance`).
+- The public repository is accessible without authentication. The README maps the graph
+  and explains where FalkorDB supplies the agent's decisions; it contains no demo section.
+- Video recording/editing and submission through the event form remain with the project owner.

@@ -13,10 +13,10 @@ from collections.abc import Callable
 
 from pydantic import BaseModel
 
-from bragent.graph.client import run_rw
-from bragent.graph.queries import wipe
-from bragent.graph.schema import ensure_indexes
-from bragent.models import EdgeRef, Finding
+from severance.graph.client import run_rw
+from severance.graph.queries import wipe
+from severance.graph.schema import ensure_indexes
+from severance.models import EdgeRef, Finding
 
 _ACTIONS = {
     "bucket": [("s3:GetObject", "read"), ("s3:PutObject", "write")],

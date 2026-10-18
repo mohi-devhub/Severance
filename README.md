@@ -1,4 +1,4 @@
-# BlastRadius Agent
+# Severance
 
 **Given a cloud security finding, this agent traces shortest paths an untrusted identity could walk
 to the exposed resource. It then picks the one load-bearing edge to cut, proves the fix on a copy
@@ -13,43 +13,7 @@ The project runs locally with synthetic IAM data. FalkorDB is the operational co
 without it the agent cannot establish reachability, select a fix, simulate it, or apply it.
 
 For a quick review: [local setup](#run-it), [graph model](#graph-data-model),
-[essential queries](#queries-that-drive-the-agent), [demo video](demo/blastradius-demo.mp4),
-[actual terminal transcript](demo/transcript.txt), and [audit evidence](demo/audit.jsonl).
-
-[![Watch the recorded working demo](demo/poster.png)](demo/blastradius-demo.mp4)
-
-90-second silent, annotated replay of a real Sonnet investigation. Playback timing is
-adjusted for readability; the original terminal output and audit are included.
-
-<details>
-<summary>Read a representative terminal run</summary>
-
-```
-$ bragent demo
-▶ Seeding scenario: escalation_chain … ✓ 64 nodes, 71 edges
-▶ Finding: overly_permissive on prod-db (database, sensitivity=critical)
-
-SHORTEST EXTERNAL PATH (blast radius = 6 hops, 1 external entry point)
-  guest(external) ─CAN_ASSUME→ build-role ─CAN_ASSUME→ deploy-role ─CAN_ASSUME→
-  admin-role ─GRANTS→ IAMFullAccess ─PERMITS→ iam:AttachRolePolicy ─TARGETS→ prod-db
-
-LOAD-BEARING NODE (betweenness): admin-role (role, 77)
-
-PROPOSED FIX: detach_policy — Detach policy IAMFullAccess from role admin-role.
-
-DRY-RUN (on graph copy)
-                          before     after
- reachers                      4  →      3
- external reachers             1  →      0  ✓
- shortest external hops        6  →      ∞  ✓
- severity                     18  →     12
- paths closed                  1
- collateral (legit lost)       0            ✓
-Approve this remediation? [y/N]: y
-✓ Applied to live graph.  Audit: audit/run-041dd4.jsonl
-```
-
-</details>
+[essential queries](#queries-that-drive-the-agent), and [Track 01 evidence](#track-01-evidence).
 
 A scanner says *"prod-db is reachable."* This agent shows the 6-hop chain from a guest identity
 and the one policy that chain depends on. It also proves, before you approve anything, that
@@ -59,16 +23,15 @@ detaching that policy closes the path and leaves every legitimate user's access 
 
 | Focus | Working implementation | Evidence |
 |---|---|---|
-| Multi-hop reasoning | Follow external identity → assumed roles → policy → action → resource; the escalation scenario spans 6 edges. | [Queries](src/bragent/graph/queries.py), exact-path tests in [test_queries.py](tests/test_queries.py). |
-| Graph queries and algorithms as tools | `GRAPH.RO_QUERY`, `algo.SPpaths`, and seeded `algo.betweenness` supply reachers, shortest paths, and broker rankings. | [Scoring](src/bragent/scoring/blast_radius.py), [planner](src/bragent/remediation/planner.py). |
-| Tool selection through MCP | A live Claude Agent SDK session chooses from nine typed tools on the in-process `iam` MCP server. Built-in shell, filesystem, and web tools are disabled. | [MCP tools](src/bragent/agent/tools.py), [agent loop](src/bragent/agent/runner.py), live approve/reject tests in [test_end_to_end.py](tests/test_end_to_end.py). |
-| Actions based on the graph | Score candidate cuts on copies, simulate the selected plan, ask for approval, then delete the specific approved edge. | [Dry-run](src/bragent/remediation/dryrun.py), [approval gate](src/bragent/remediation/apply.py), [safety tests](tests/test_remediation.py). |
-| Explainable results | Show the exact exploit path, broker score, chosen edge, before/after metrics, alternatives, and an append-only audit trail. | [Recorded demo audit](demo/audit.jsonl), [audit implementation](src/bragent/audit/log.py). |
+| Multi-hop reasoning | Follow external identity → assumed roles → policy → action → resource; the escalation scenario spans 6 edges. | [Queries](src/severance/graph/queries.py), exact-path tests in [test_queries.py](tests/test_queries.py). |
+| Graph queries and algorithms as tools | `GRAPH.RO_QUERY`, `algo.SPpaths`, and seeded `algo.betweenness` supply reachers, shortest paths, and broker rankings. | [Scoring](src/severance/scoring/blast_radius.py), [planner](src/severance/remediation/planner.py). |
+| Tool selection through MCP | A live Claude Agent SDK session chooses from nine typed tools on the in-process `iam` MCP server. Built-in shell, filesystem, and web tools are disabled. | [MCP tools](src/severance/agent/tools.py), [agent loop](src/severance/agent/runner.py), live approve/reject tests in [test_end_to_end.py](tests/test_end_to_end.py). |
+| Actions based on the graph | Score candidate cuts on copies, simulate the selected plan, ask for approval, then delete the specific approved edge. | [Dry-run](src/severance/remediation/dryrun.py), [approval gate](src/severance/remediation/apply.py), [safety tests](tests/test_remediation.py). |
+| Explainable results | Show the exact exploit path, broker score, chosen edge, before/after metrics, alternatives, and an append-only audit trail. | [Audit implementation](src/severance/audit/log.py), [audit and safety tests](tests/test_remediation.py). |
 
-The demo uses explicit auto-approval on synthetic data so it can run unattended; normal
-`investigate` requests interactive approval, and piped/non-interactive input defaults to rejection.
-The video replays an actual Sonnet run with timing adjusted for readability; its source output
-and audit are included. Re-record with `.venv/bin/python demo/record.py` (one paid investigation).
+`investigate` requests interactive approval before a mutation. Piped or non-interactive
+input defaults to rejection. The graph-derived plan and dry-run stay in server-side
+session state; the model refers to them by `plan_id` rather than supplying edited facts.
 
 ## Graph data model
 
@@ -97,18 +60,28 @@ flowchart LR
     A -->|GRANTS: proposed cut| P[IAMFullAccess]
     P -->|PERMITS| X["iam:AttachRolePolicy"]
     X -->|TARGETS| R["prod-db · critical"]
+    U["alice · internal"] -->|MEMBER_OF| G["dba-team · group"]
+    G -->|HAS_ROLE| DBA[dba-role]
+    DBA -->|GRANTS| RP[RDSReadWrite]
+    RP -->|PERMITS| SQL["rds:ExecuteStatement"]
+    SQL -->|TARGETS| R
+    U -->|HAS_ROLE| A
 ```
+
+The diagram shows the external escalation chain alongside an internal user's independent
+database access. Removing the marked `GRANTS` edge closes external access while the
+legitimate path remains connected; the dry-run verifies that outcome with graph queries.
 
 IDs have label indexes; resources also have a name index. The seeded graph contains the
 full IAM topology for each scenario and an unrelated decoy organisation. Ground truth
 stays in the test/seeder layer and is never included in the agent's tools or finding prompt.
-See [schema](src/bragent/graph/schema.py) and [deterministic seeder](src/bragent/graph/seeder.py).
+See [schema](src/severance/graph/schema.py) and [deterministic seeder](src/severance/graph/seeder.py).
 
 ## Queries that drive the agent
 
 These are the essential Cypher operations, not a separate Python reconstruction of the
 graph. Values such as `$rid` are passed as query parameters. Full queries and typed
-decoding live in [graph/queries.py](src/bragent/graph/queries.py).
+decoding live in [graph/queries.py](src/severance/graph/queries.py).
 
 **Who reaches the finding's resource?** Walk backward from the indexed resource to its
 actions/policies/roles, then follow identity and assume-role relationships:
@@ -198,9 +171,9 @@ Reproduce the larger comparison with 10 calls per scenario (40 total), or use `-
 for half as many calls:
 
 ```bash
-.venv/bin/bragent benchmark --llm-runs 10 --baseline-scale 10
+.venv/bin/severance benchmark --llm-runs 10 --baseline-scale 10
 # After an interruption, reuse saved calls with the same options:
-.venv/bin/bragent benchmark --llm-runs 10 --baseline-scale 10 --resume
+.venv/bin/severance benchmark --llm-runs 10 --baseline-scale 10 --resume
 ```
 
 Scale 10 writes `results/baseline_scale10.json` and `.md`, leaving the small-graph baseline
@@ -273,7 +246,7 @@ If the runner-up ties on keys 1–3, the approval prompt shows it as an alternat
 ## Architecture
 
 ```
-cli/main.py ─ typer + rich: investigate · demo · seed · graph-stats · benchmark · reset
+cli/main.py ─ typer + rich: investigate · seed · graph-stats · benchmark · reset
      │
 agent/runner.py ─ Claude Agent SDK loop, approver injected per run
 agent/tools.py  ─ 9 typed tools → in-process MCP server ("iam"), per-call audit
@@ -306,8 +279,7 @@ cp .env.example .env              # first setup only; preserve an existing .env
 make up                           # pinned FalkorDB, waits for a healthy database
 make test                         # deterministic tests; no paid API calls
 make lint
-.venv/bin/bragent demo             # real agent loop; synthetic demo auto-approval
-.venv/bin/bragent investigate --scenario broker_policy  # real y/N in a terminal
+.venv/bin/severance investigate --scenario broker_policy  # real y/N in a terminal
 make test-agent                   # opt-in paid approve/reject integration tests
 make bench-engine                 # correctness + scale; no paid API calls
 # make bench                      # defaults to 40 paid tool-less baseline calls
@@ -321,11 +293,11 @@ The checked-in `uv.lock` reproduces dependencies. Docker Compose pins the verifi
 FalkorDB 4.22.1 image by its multi-platform digest and binds port 6380 to localhost.
 The graph is disposable in this local setup; use `seed` to recreate any scenario.
 If 6380 is occupied, choose a free `FALKOR_PORT` in `.env`. `make up` and the client
-read the same setting. `demo` and `investigate --scenario` replace their active synthetic
-graph, while tests and benchmarks use separate graph names.
+read the same setting. `investigate --scenario` replaces its active synthetic graph,
+while tests and benchmarks use separate graph names.
 
 For a judge without API credentials, `make test` verifies the graph queries, planner,
-dry-run and approval gates. The recorded demo and audit show the real MCP agent loop.
+dry-run and approval gates. `make test-agent` exercises the real MCP agent loop.
 GitHub Actions runs lint, formatting, the deterministic suite against FalkorDB, and a
 wheel/source build on every push; no LLM secret is needed for CI.
 
@@ -342,14 +314,14 @@ explanations shown, rather than an enumeration of every possible exploit path.
 
 **AI coding disclosure:** Claude Code assisted the initial implementation. OpenAI Codex
 assisted with benchmark recovery, failure handling, tests, documentation, build/CI,
-and submission preparation. The demo composition was built with HyperFrames. All reported
-benchmark numbers come from recorded runs; deterministic tests and live approve/reject
+and submission preparation. All reported benchmark numbers come from recorded runs;
+deterministic tests and live approve/reject
 agent tests verify the implementation. The model selects tools and explains their outputs;
 it is not the source of graph facts or scores.
 
-The [official submission rules](https://www.wemakedevs.org/hackathons/falkordb/rules)
-require a public repository and a demo video. This repository remains private at the
-team leader's request; change its visibility before submitting. See [submission notes](SUBMISSION.md).
+The [source repository](https://github.com/mohi-devhub/Severance) is public and can be
+reviewed without signing in. See [submission notes](SUBMISSION.md) for the Track 01
+requirements and verification status.
 
 ## Implementation notes
 

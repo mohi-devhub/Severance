@@ -3,8 +3,8 @@ import asyncio
 import pytest
 from claude_agent_sdk import ResultMessage
 
-from bragent.agent import runner, tools
-from bragent.models import Finding
+from severance.agent import runner, tools
+from severance.models import Finding
 
 
 @pytest.mark.parametrize("transport_error", [False, True])

@@ -9,3 +9,9 @@ __pycache__/
 .ruff_cache/
 /audit/
 src/bragent/agent/system_prompt.txt
+dist/
+node_modules/
+.hyperframes/
+.thumbnails/
+.agents/
+.codex/

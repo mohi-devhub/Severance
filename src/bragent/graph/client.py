@@ -4,6 +4,7 @@ The active graph is held in a contextvar so a dry-run can redirect every query
 to a throwaway copy without threading a graph handle through each call.
 """
 
+import time
 import uuid
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -11,6 +12,7 @@ from contextvars import ContextVar
 from typing import Any
 
 from falkordb import FalkorDB
+from redis.exceptions import ResponseError
 
 from bragent.config import settings
 
@@ -42,7 +44,15 @@ def run_rw(cypher: str, params: dict[str, Any] | None = None):
 
 
 def copy_graph(src: str, dst: str) -> None:
-    db().connection.execute_command("GRAPH.COPY", src, dst)
+    # Redis permits one fork at a time. An RDB save can briefly overlap a dry-run.
+    for attempt in range(10):
+        try:
+            db().connection.execute_command("GRAPH.COPY", src, dst)
+            return
+        except ResponseError as exc:
+            if "GRAPH.COPY failed, could not fork" not in str(exc) or attempt == 9:
+                raise
+            time.sleep(0.1 * (attempt + 1))
 
 
 def drop_graph(name: str) -> None:

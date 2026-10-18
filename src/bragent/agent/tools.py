@@ -167,6 +167,9 @@ def _request_approval(s: Session, args: dict) -> dict:
     if dr is None:
         raise ToolError("call simulate_remediation for this plan before requesting approval")
     approval = s.approver(plan, dr)
+    previous = s.approvals.get(args["plan_id"])
+    if previous:
+        apply.revoke_token(previous.token)
     if approval.approved:
         approval.token = apply.issue_token(plan)
     s.approvals[args["plan_id"]] = approval

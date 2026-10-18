@@ -1,7 +1,5 @@
 """System prompt and the finding → first-message renderer."""
 
-from pathlib import Path
-
 from bragent.config import settings
 from bragent.models import Finding
 
@@ -31,13 +29,6 @@ When you explain to the human, show the path as a readable chain and the
 before/after numbers from the dry-run. Be concise. Do not speculate beyond the
 tool results.
 """
-
-PROMPT_FILE = Path(__file__).with_name("system_prompt.txt")
-
-
-def write_prompt_file() -> Path:
-    PROMPT_FILE.write_text(SYSTEM_PROMPT)
-    return PROMPT_FILE
 
 
 def render_finding_prompt(finding: Finding) -> str:

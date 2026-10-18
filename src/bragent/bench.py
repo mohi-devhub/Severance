@@ -7,11 +7,13 @@ C. query latency vs graph size
 
 import asyncio
 import csv
+import hashlib
 import json
 import re
 import statistics
 import time
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -125,25 +127,49 @@ def _graph_text() -> tuple[str, str, set[tuple[str, str, str]]]:
 async def _ask(prompt: str) -> str:
     from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
 
-    opts = ClaudeAgentOptions(tools=[], setting_sources=[], model=settings.model, max_turns=1)
+    opts = ClaudeAgentOptions(
+        tools=[],
+        setting_sources=[],
+        model=settings.model,
+        max_turns=1,
+        env={"ANTHROPIC_API_KEY": settings.anthropic_api_key} if settings.anthropic_api_key else {},
+    )
     text = ""
+    error = None
     async for msg in query(prompt=prompt, options=opts):
         if isinstance(msg, ResultMessage):
+            if msg.is_error or msg.subtype != "success":
+                detail = "; ".join(msg.errors or []) or msg.result or msg.subtype
+                error = f"Claude call failed: {detail}"
             text = msg.result or ""
+    if error:
+        raise RuntimeError(error)
+    if not text.strip():
+        raise RuntimeError("Claude call returned no result")
     return text
 
 
 def _parse(text: str) -> dict[str, Any] | None:
     m = re.search(r"\{.*\}", text, re.S)
     try:
-        return json.loads(m.group(0)) if m else None
+        ans = json.loads(m.group(0)) if m else None
     except json.JSONDecodeError:
         return None
+    if not isinstance(ans, dict):
+        return None
+    path, fix = ans.get("path"), ans.get("fix_edge")
+    if not isinstance(path, list) or not path or not all(isinstance(n, str) for n in path):
+        return None
+    if not isinstance(fix, dict) or not all(
+        isinstance(fix.get(k), str) and fix[k] for k in ("from_id", "type", "to_id")
+    ):
+        return None
+    return ans
 
 
 def _score(ans: dict | None, t: ScenarioTruth, edges: set[tuple]) -> dict[str, Any]:
     if not ans:
-        return {"path_ok": False, "fix_ok": False, "hallucinated": True, "key": "unparseable"}
+        return {"path_ok": False, "fix_ok": False, "hallucinated": False, "key": None}
     path = ans.get("path") or []
     fix = ans.get("fix_edge") or {}
     fix_t = (fix.get("from_id"), fix.get("type"), fix.get("to_id"))
@@ -162,21 +188,78 @@ def _score(ans: dict | None, t: ScenarioTruth, edges: set[tuple]) -> dict[str, A
     }
 
 
-async def _baseline_runs(prompt: str, runs: int) -> list[str]:
+async def _baseline_runs(
+    prompt: str,
+    runs: int,
+    completed: dict[int, dict] | None = None,
+    on_result: Callable[[int, dict], None] | None = None,
+) -> list[dict]:
+    """Isolate call failures and checkpoint each completion before waiting for peers."""
     limit = asyncio.Semaphore(4)
+    results = dict(completed or {})
 
-    async def one() -> str:
+    async def one(index: int) -> None:
         async with limit:
-            return await _ask(prompt)
+            try:
+                text = await _ask(prompt)
+                result = {"text": text, "error": None if _parse(text) else "Invalid answer JSON"}
+            except Exception as exc:
+                result = {"text": "", "error": f"{type(exc).__name__}: {exc}"}
+            results[index] = result
+            if on_result:
+                on_result(index, result)
 
-    return await asyncio.gather(*(one() for _ in range(runs)))
+    await asyncio.gather(*(one(i) for i in range(runs) if i not in results))
+    return [results[i] for i in range(runs)]
 
 
-def _stability(keys: list[str]) -> float:
-    return Counter(keys).most_common(1)[0][1] / len(keys) if keys else 0.0
+def _write_json(path: Path, data: Any) -> None:
+    """Replace atomically so an interrupted write leaves the last checkpoint readable."""
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2) + "\n")
+    tmp.replace(path)
 
 
-def baseline(runs: int, graph_scale: int = 1) -> list[dict[str, Any]]:
+def _baseline_summary(name: str, cond: str, scores: list[dict], **metadata) -> dict:
+    runs = len(scores)
+    valid = [s for s in scores if s["key"] is not None]
+    modal = Counter(s["key"] for s in valid).most_common(1)
+    return {
+        "scenario": name,
+        "condition": cond,
+        **metadata,
+        "runs": runs,
+        "failed_runs": runs - len(valid),
+        "path_acc": sum(s["path_ok"] for s in scores) / runs,
+        "fix_acc": sum(s["fix_ok"] for s in scores) / runs,
+        "stability": modal[0][1] / runs if modal else 0.0,
+        "hallucination_rate": sum(s["hallucinated"] for s in valid) / len(valid) if valid else None,
+        "modal_answer": json.loads(modal[0][0]) if modal else None,
+    }
+
+
+def baseline(
+    runs: int,
+    graph_scale: int = 1,
+    *,
+    checkpoint: Path | None = None,
+    resume: bool = False,
+    log=print,
+) -> list[dict[str, Any]]:
+    if runs < 1 or graph_scale < 1:
+        raise ValueError("runs and graph_scale must be positive")
+    metadata = {"version": 1, "model": settings.model, "graph_scale": graph_scale, "runs": runs}
+    state = {"metadata": metadata, "scenarios": {}}
+    if resume:
+        if checkpoint is None or not checkpoint.exists():
+            raise ValueError("No baseline checkpoint exists to resume")
+        state = json.loads(checkpoint.read_text())
+        if state["metadata"] != metadata:
+            raise ValueError(
+                "Checkpoint model, scale or run count differs; use the original options"
+            )
+    elif checkpoint:
+        _write_json(checkpoint, state)
     rows = []
     for name in SCENARIOS:
         t = seed(name, scale=graph_scale)
@@ -191,40 +274,58 @@ def baseline(runs: int, graph_scale: int = 1) -> list[dict[str, Any]]:
             nodes=node_txt,
             edges=edge_txt,
         )
-        answers = asyncio.run(_baseline_runs(prompt, runs))
-        llm = [_score(_parse(a), t, edges) for a in answers]
+        digest = hashlib.sha256(prompt.encode()).hexdigest()
+        scenario = state["scenarios"].setdefault(name, {"prompt_sha256": digest, "runs": {}})
+        if scenario["prompt_sha256"] != digest:
+            raise ValueError(f"{name}: graph or prompt changed since the checkpoint")
+        completed = {int(i): result for i, result in scenario["runs"].items()}
+        log(f"  {name}: {t.node_count} nodes, {t.edge_count} edges; {len(completed)}/{runs} saved")
+
+        def save(index: int, result: dict, *, scenario=scenario, name=name) -> None:
+            scenario["runs"][str(index)] = result
+            if checkpoint:
+                _write_json(checkpoint, state)
+            status = f"FAILED: {result['error']}" if result["error"] else "ok"
+            log(f"    {name} run {index + 1}/{runs}: {status}")
+
+        answers = asyncio.run(_baseline_runs(prompt, runs, completed, save))
+        llm = [_score(None if a["error"] else _parse(a["text"]), t, edges) for a in answers]
         for cond, scores in (("engine", engine), ("llm_no_tools", llm)):
             rows.append(
-                {
-                    "scenario": name,
-                    "condition": cond,
-                    "runs": runs,
-                    "path_acc": sum(s["path_ok"] for s in scores) / runs,
-                    "fix_acc": sum(s["fix_ok"] for s in scores) / runs,
-                    "stability": _stability([s["key"] for s in scores]),
-                    "hallucination_rate": sum(s["hallucinated"] for s in scores) / runs,
-                    "modal_answer": json.loads(
-                        Counter(s["key"] for s in scores).most_common(1)[0][0]
-                    )
-                    if scores[0]["key"] != "unparseable"
-                    else None,
-                }
+                _baseline_summary(
+                    name,
+                    cond,
+                    scores,
+                    model=settings.model,
+                    graph_scale=graph_scale,
+                    nodes=t.node_count,
+                    edges=t.edge_count,
+                )
             )
+        if checkpoint:
+            summary = checkpoint.with_name(checkpoint.name.removesuffix(".runs.json") + ".json")
+            _write_json(summary, rows)
+            summary.with_suffix(".md").write_text(baseline_md(rows) + "\n")
     return rows
 
 
 def baseline_md(rows: list[dict]) -> str:
     out = [
         "| scenario | condition | exact path | fix edge | same answer across runs "
-        "| hallucinated edges |",
-        "|---|---|---|---|---|---|",
+        "| hallucinated edges | failed runs |",
+        "|---|---|---|---|---|---|---|",
     ]
     for r in rows:
+        hallucinations = r["hallucination_rate"]
+        hall = f"{hallucinations:.0%}" if hallucinations is not None else "—"
         out.append(
             f"| {r['scenario']} | {r['condition']} | {r['path_acc']:.0%} | {r['fix_acc']:.0%} "
-            f"| {r['stability']:.0%} | {r['hallucination_rate']:.0%} |"
+            f"| {r['stability']:.0%} | {hall} | {r.get('failed_runs', 0)}/{r['runs']} |"
         )
-    return "\n".join(out)
+    return "\n".join(out) + (
+        "\n\nAccuracy and stability use all attempted runs; failures count as misses. "
+        "Hallucinated-edge rate uses valid answers only (— if none)."
+    )
 
 
 # ── C. scale ───────────────────────────────────────────────────────────────────
@@ -282,7 +383,7 @@ def _plot(rows: list[dict], path: Path) -> None:
 # ── entry point ────────────────────────────────────────────────────────────────
 
 
-def run_all(llm_runs: int, baseline_scale: int = 1, log=print) -> Path:
+def run_all(llm_runs: int, baseline_scale: int = 1, log=print, *, resume: bool = False) -> Path:
     RESULTS.mkdir(exist_ok=True)
     with use_graph(BENCH_GRAPH):
         try:
@@ -297,16 +398,22 @@ def run_all(llm_runs: int, baseline_scale: int = 1, log=print) -> Path:
                     f"B. engine vs tool-less LLM ({llm_runs} runs/scenario, "
                     f"scale {baseline_scale}) …"
                 )
-                b = baseline(llm_runs, baseline_scale)
                 stem = "baseline" if baseline_scale == 1 else f"baseline_scale{baseline_scale}"
-                (RESULTS / f"{stem}.json").write_text(json.dumps(b, indent=2))
+                b = baseline(
+                    llm_runs,
+                    baseline_scale,
+                    checkpoint=RESULTS / f"{stem}.runs.json",
+                    resume=resume,
+                    log=log,
+                )
+                _write_json(RESULTS / f"{stem}.json", b)
                 (RESULTS / f"{stem}.md").write_text(baseline_md(b) + "\n")
                 log(baseline_md(b))
 
             log("C. scale …")
             c = scale()
             with (RESULTS / "scale.csv").open("w", newline="") as f:
-                w = csv.DictWriter(f, fieldnames=list(c[0]))
+                w = csv.DictWriter(f, fieldnames=list(c[0]), lineterminator="\n")
                 w.writeheader()
                 w.writerows(c)
             _plot(c, RESULTS / "scale.png")

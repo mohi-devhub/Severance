@@ -1,0 +1,61 @@
+▶ Seeding scenario: escalation_chain … ✓ 64 nodes, 71 edges
+▶ Investigating with the agent …
+▶ Finding: overly_permissive on prod-db (database, sensitivity=critical)
+WHO CAN REACH (4 principals)
+┏━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ principal ┃ kind     ┃ hops ┃ via                                        ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ guest     │ external │ 6    │ iam:AttachRolePolicy                       │
+│ dba-team  │ group    │ 4    │ rds:ExecuteStatement                       │
+│ alice     │ user     │ 4    │ iam:AttachRolePolicy, rds:ExecuteStatement │
+│ bob       │ user     │ 4    │ iam:AttachRolePolicy, rds:ExecuteStatement │
+└───────────┴──────────┴──────┴────────────────────────────────────────────┘
+
+SHORTEST EXTERNAL PATH (blast radius = 6 hops, 1 external entry point)
+  guest(external) ─CAN_ASSUME→ build-role ─CAN_ASSUME→ deploy-role ─CAN_ASSUME→ admin-role ─GRANTS→
+IAMFullAccess ─PERMITS→ iam:AttachRolePolicy ─TARGETS→ prod-db
+
+LOAD-BEARING NODE (betweenness): admin-role (role, 77)
+  IAMFullAccess (Policy) 26
+  deploy-role (Role) 24
+  build-role (Role) 9
+
+PROPOSED FIX: detach_policy — Detach policy IAMFullAccess from role admin-role. Closes 1 of 1 shortest
+external path(s); 0 external reacher(s) remain; collateral 0; broker score 77.
+
+DRY-RUN (on graph copy)
+                          before     after
+ reachers                      4  →      3
+ external reachers             1  →      0  ✓
+ shortest external hops        6  →      ∞  ✓
+ severity                     18  →     12
+ paths closed                  1
+ collateral (legit lost)       0            ✓
+Approve this remediation? [y/N]: y (--auto-approve)
+✓ Applied to live graph.
+
+╭────────────────────────────────────────────── agent summary ───────────────────────────────────────────────╮
+│ I detached the IAMFullAccess policy from `admin-role`, which cuts the guest's path to `prod-db`. After the │
+│ change, no external principals can reach `prod-db`.                                                        │
+│                                                                                                            │
+│ **Path found:**                                                                                            │
+│ guest → build-role → deploy-role → admin-role → IAMFullAccess → iam:AttachRolePolicy → prod-db (6 hops)    │
+│                                                                                                            │
+│ `admin-role` ranked highest of the roles and policies on that path (broker score 77).                      │
+│                                                                                                            │
+│ **Dry-run results (plan-936516):**                                                                         │
+│                                                                                                            │
+│ | | Before | After |                                                                                       │
+│ |---|---|---|                                                                                              │
+│ | Reachers | 4 | 3 |                                                                                       │
+│ | External reachers | 1 | 0 |                                                                              │
+│ | Shortest external path | 6 hops | none |                                                                 │
+│ | Severity | 18.0 | 12.0 |                                                                                 │
+│                                                                                                            │
+│ The dry-run showed no collateral. Approval came from `auto-approve`, a demo auto-approval, not a person. I │
+│ applied the plan with its token, and the live graph now shows 0 external reachers.                         │
+│                                                                                                            │
+│ Three internal principals can still reach `prod-db`: `dba-team`, `alice` and `bob`. I didn't change those. │
+│ The audit record is written to `audit/demo/run-f96994.jsonl`.                                              │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+✓ Applied. Audit record: audit/demo/run-f96994.jsonl

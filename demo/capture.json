@@ -1,0 +1,254 @@
+{
+  "kind": "actual_cli_capture",
+  "started_at": "2026-10-18T10:51:53.063723+00:00",
+  "model": "claude-sonnet-5-5",
+  "command": "GRAPH_NAME=iam_demo .venv/bin/bragent demo",
+  "approval": "Explicit demo auto-approval on synthetic data",
+  "duration_seconds": 24.032,
+  "events": [
+    {
+      "at": 0.163,
+      "text": "\u25b6 Seeding scenario: escalation_chain \u2026 \u2713 64 nodes, 71 edges\n"
+    },
+    {
+      "at": 0.432,
+      "text": "\u25b6 Investigating with the agent \u2026\n"
+    },
+    {
+      "at": 4.229,
+      "text": "\u25b6 Finding: overly_permissive on prod-db (database, sensitivity=critical)\n"
+    },
+    {
+      "at": 7.304,
+      "text": "WHO CAN REACH (4 principals)                                                \n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u250f\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2533\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2513\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2503 principal \u2503 kind     \u2503 hops \u2503 via                                        \u2503\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2521\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2547\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2529\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2502 guest     \u2502 external \u2502 6    \u2502 iam:AttachRolePolicy                       \u2502\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2502 dba-team  \u2502 group    \u2502 4    \u2502 rds:ExecuteStatement                       \u2502\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2502 alice     \u2502 user     \u2502 4    \u2502 iam:AttachRolePolicy, rds:ExecuteStatement \u2502\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2502 bob       \u2502 user     \u2502 4    \u2502 iam:AttachRolePolicy, rds:ExecuteStatement \u2502\n"
+    },
+    {
+      "at": 7.304,
+      "text": "\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\n"
+    },
+    {
+      "at": 7.322,
+      "text": "\n"
+    },
+    {
+      "at": 7.322,
+      "text": "SHORTEST EXTERNAL PATH (blast radius = 6 hops, 1 external entry point)\n"
+    },
+    {
+      "at": 7.323,
+      "text": "  guest(external) \u2500CAN_ASSUME\u2192 build-role \u2500CAN_ASSUME\u2192 deploy-role \u2500CAN_ASSUME\u2192 admin-role \u2500GRANTS\u2192 \n"
+    },
+    {
+      "at": 7.323,
+      "text": "IAMFullAccess \u2500PERMITS\u2192 iam:AttachRolePolicy \u2500TARGETS\u2192 prod-db\n"
+    },
+    {
+      "at": 7.458,
+      "text": "\n"
+    },
+    {
+      "at": 7.458,
+      "text": "LOAD-BEARING NODE (betweenness): admin-role (role, 77)\n"
+    },
+    {
+      "at": 7.458,
+      "text": "  IAMFullAccess (Policy) 26\n"
+    },
+    {
+      "at": 7.458,
+      "text": "  deploy-role (Role) 24\n"
+    },
+    {
+      "at": 7.458,
+      "text": "  build-role (Role) 9\n"
+    },
+    {
+      "at": 9.934,
+      "text": "\n"
+    },
+    {
+      "at": 9.934,
+      "text": "PROPOSED FIX: detach_policy \u2014 Detach policy IAMFullAccess from role admin-role. Closes 1 of 1 shortest \n"
+    },
+    {
+      "at": 9.934,
+      "text": "external path(s); 0 external reacher(s) remain; collateral 0; broker score 77.\n"
+    },
+    {
+      "at": 11.696,
+      "text": "\n"
+    },
+    {
+      "at": 11.696,
+      "text": "DRY-RUN (on graph copy)\n"
+    },
+    {
+      "at": 11.699,
+      "text": "                          before     after    \n"
+    },
+    {
+      "at": 11.699,
+      "text": " reachers                      4  \u2192      3    \n"
+    },
+    {
+      "at": 11.699,
+      "text": " external reachers             1  \u2192      0  \u2713 \n"
+    },
+    {
+      "at": 11.699,
+      "text": " shortest external hops        6  \u2192      \u221e  \u2713 \n"
+    },
+    {
+      "at": 11.699,
+      "text": " severity                     18  \u2192     12    \n"
+    },
+    {
+      "at": 11.699,
+      "text": " paths closed                  1              \n"
+    },
+    {
+      "at": 11.699,
+      "text": " collateral (legit lost)       0            \u2713 \n"
+    },
+    {
+      "at": 13.415,
+      "text": "Approve this remediation? [y/N]: y (--auto-approve)\n"
+    },
+    {
+      "at": 16.083,
+      "text": "\u2713 Applied to live graph.\n"
+    },
+    {
+      "at": 23.947,
+      "text": "\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u256d\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 agent summary \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256e\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 I detached the IAMFullAccess policy from `admin-role`, which cuts the guest's path to `prod-db`. After the \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 change, no external principals can reach `prod-db`.                                                        \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 **Path found:**                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 guest \u2192 build-role \u2192 deploy-role \u2192 admin-role \u2192 IAMFullAccess \u2192 iam:AttachRolePolicy \u2192 prod-db (6 hops)    \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 `admin-role` ranked highest of the roles and policies on that path (broker score 77).                      \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 **Dry-run results (plan-936516):**                                                                         \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 | | Before | After |                                                                                       \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 |---|---|---|                                                                                              \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 | Reachers | 4 | 3 |                                                                                       \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 | External reachers | 1 | 0 |                                                                              \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 | Shortest external path | 6 hops | none |                                                                 \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 | Severity | 18.0 | 12.0 |                                                                                 \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 The dry-run showed no collateral. Approval came from `auto-approve`, a demo auto-approval, not a person. I \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 applied the plan with its token, and the live graph now shows 0 external reachers.                         \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502                                                                                                            \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 Three internal principals can still reach `prod-db`: `dba-team`, `alice` and `bob`. I didn't change those. \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2502 The audit record is written to `audit/demo/run-f96994.jsonl`.                                              \u2502\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256f\n"
+    },
+    {
+      "at": 23.948,
+      "text": "\u2713 Applied. Audit record: audit/demo/run-f96994.jsonl\n"
+    }
+  ]
+}

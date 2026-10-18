@@ -29,6 +29,11 @@ def issue_token(plan: RemediationPlan) -> str:
     return token
 
 
+def revoke_token(token: str) -> None:
+    """Expire unused consent when a decision changes or an investigation ends."""
+    _issued.pop(token, None)
+
+
 def apply(
     plan: RemediationPlan,
     token: str,

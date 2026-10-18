@@ -1,10 +1,28 @@
 # BlastRadius Agent
 
-**Given a cloud security finding, this agent traces every path an untrusted identity could walk
+**Given a cloud security finding, this agent traces shortest paths an untrusted identity could walk
 to the exposed resource. It then picks the one load-bearing edge to cut, proves the fix on a copy
 of the graph, and only then asks a human to approve it.**
 
 The LLM plans and explains. Every path, count and score comes from a graph query.
+
+Built for **Graph Hacks: Context for AI Agents**, powered by FalkorDB.
+**Track 01: Agents That Act on Connected Data.** Team: **pied-piper**.
+
+The project runs locally with synthetic IAM data. FalkorDB is the operational context layer:
+without it the agent cannot establish reachability, select a fix, simulate it, or apply it.
+
+For a quick review: [local setup](#run-it), [graph model](#graph-data-model),
+[essential queries](#queries-that-drive-the-agent), [demo video](demo/blastradius-demo.mp4),
+[actual terminal transcript](demo/transcript.txt), and [audit evidence](demo/audit.jsonl).
+
+[![Watch the recorded working demo](demo/poster.png)](demo/blastradius-demo.mp4)
+
+90-second silent, annotated replay of a real Sonnet investigation. Playback timing is
+adjusted for readability; the original terminal output and audit are included.
+
+<details>
+<summary>Read a representative terminal run</summary>
 
 ```
 $ bragent demo
@@ -31,9 +49,105 @@ Approve this remediation? [y/N]: y
 ✓ Applied to live graph.  Audit: audit/run-041dd4.jsonl
 ```
 
+</details>
+
 A scanner says *"prod-db is reachable."* This agent shows the 6-hop chain from a guest identity
 and the one policy that chain depends on. It also proves, before you approve anything, that
 detaching that policy closes the path and leaves every legitimate user's access intact.
+
+## Track 01 evidence
+
+| Focus | Working implementation | Evidence |
+|---|---|---|
+| Multi-hop reasoning | Follow external identity → assumed roles → policy → action → resource; the escalation scenario spans 6 edges. | [Queries](src/bragent/graph/queries.py), exact-path tests in [test_queries.py](tests/test_queries.py). |
+| Graph queries and algorithms as tools | `GRAPH.RO_QUERY`, `algo.SPpaths`, and seeded `algo.betweenness` supply reachers, shortest paths, and broker rankings. | [Scoring](src/bragent/scoring/blast_radius.py), [planner](src/bragent/remediation/planner.py). |
+| Tool selection through MCP | A live Claude Agent SDK session chooses from nine typed tools on the in-process `iam` MCP server. Built-in shell, filesystem, and web tools are disabled. | [MCP tools](src/bragent/agent/tools.py), [agent loop](src/bragent/agent/runner.py), live approve/reject tests in [test_end_to_end.py](tests/test_end_to_end.py). |
+| Actions based on the graph | Score candidate cuts on copies, simulate the selected plan, ask for approval, then delete the specific approved edge. | [Dry-run](src/bragent/remediation/dryrun.py), [approval gate](src/bragent/remediation/apply.py), [safety tests](tests/test_remediation.py). |
+| Explainable results | Show the exact exploit path, broker score, chosen edge, before/after metrics, alternatives, and an append-only audit trail. | [Recorded demo audit](demo/audit.jsonl), [audit implementation](src/bragent/audit/log.py). |
+
+The demo uses explicit auto-approval on synthetic data so it can run unattended; normal
+`investigate` requests interactive approval, and piped/non-interactive input defaults to rejection.
+The video replays an actual Sonnet run with timing adjusted for readability; its source output
+and audit are included. Re-record with `.venv/bin/python demo/record.py` (one paid investigation).
+
+## Graph data model
+
+| Label | Key properties | Meaning |
+|---|---|---|
+| `Principal` | `id`, `name`, `kind` | User, group, service, or untrusted external identity. Groups use the same label with `kind='group'`. |
+| `Role` | `id`, `name`, `trust` | An assumable role; `trust='broad'` identifies a broad-trust role. |
+| `Policy` | `id`, `name`, `managed` | A managed or inline permission policy. |
+| `Action` | `id`, `name` | An action scoped to one resource, e.g. `iam:AttachRolePolicy@res-prod-db`. |
+| `Resource` | `id`, `name`, `type`, `sensitivity` | Bucket, database, cluster, secret, or queue. |
+
+| Relationship | Direction | Meaning |
+|---|---|---|
+| `MEMBER_OF` | Principal → group Principal | Identity inherits group membership. |
+| `HAS_ROLE` | Principal → Role | Identity holds a role. |
+| `CAN_ASSUME` | Principal or Role → Role | Identity or role can assume another role. |
+| `GRANTS` | Role → Policy | Role carries a policy. |
+| `PERMITS` | Policy → Action | Policy permits the action (`effect='allow'`). |
+| `TARGETS` | Action → Resource | Action applies to this resource (`access='read'/'write'/'admin'`). |
+
+```mermaid
+flowchart LR
+    E["guest · external"] -->|CAN_ASSUME| B[build-role]
+    B -->|CAN_ASSUME| D[deploy-role]
+    D -->|CAN_ASSUME| A[admin-role]
+    A -->|GRANTS: proposed cut| P[IAMFullAccess]
+    P -->|PERMITS| X["iam:AttachRolePolicy"]
+    X -->|TARGETS| R["prod-db · critical"]
+```
+
+IDs have label indexes; resources also have a name index. The seeded graph contains the
+full IAM topology for each scenario and an unrelated decoy organisation. Ground truth
+stays in the test/seeder layer and is never included in the agent's tools or finding prompt.
+See [schema](src/bragent/graph/schema.py) and [deterministic seeder](src/bragent/graph/seeder.py).
+
+## Queries that drive the agent
+
+These are the essential Cypher operations, not a separate Python reconstruction of the
+graph. Values such as `$rid` are passed as query parameters. Full queries and typed
+decoding live in [graph/queries.py](src/bragent/graph/queries.py).
+
+**Who reaches the finding's resource?** Walk backward from the indexed resource to its
+actions/policies/roles, then follow identity and assume-role relationships:
+
+```cypher
+MATCH (res:Resource {id: $rid})<-[:TARGETS]-(act:Action)
+      <-[:PERMITS]-(:Policy)<-[:GRANTS]-(role:Role)
+MATCH path = (p:Principal)-[:MEMBER_OF|HAS_ROLE|CAN_ASSUME*1..6]->(role)
+RETURN p.id AS id, p.name AS name, p.kind AS kind,
+       min(length(path)) + 3 AS hops,
+       collect(DISTINCT act.name) AS via_actions
+```
+
+**Which shortest external paths explain that exposure?** `pathCount: 0` returns every
+shortest path per external identity. Python sorts ties by path length and node IDs:
+
+```cypher
+MATCH (ext:Principal {kind: 'external'}), (res:Resource {id: $rid})
+CALL algo.SPpaths({sourceNode: ext, targetNode: res,
+                  relTypes: $rel_types, relDirection: 'outgoing', pathCount: 0})
+YIELD path
+RETURN [n IN nodes(path) | n.id] AS nodes,
+       [r IN relationships(path) | type(r)] AS edges
+```
+
+**Which role or policy is load-bearing?** Sample betweenness with a fixed seed and
+`$n = 10 × node count`, then retain role/policy endpoints on the external paths:
+
+```cypher
+CALL algo.betweenness({relationshipTypes: $rel_types,
+                      samplingSize: $n, samplingSeed: 1337})
+YIELD node, score
+RETURN node.id AS id, score
+```
+
+`$rel_types` contains the six relationship types above. The planner uses `GRAPH.COPY`
+to evaluate each candidate deletion and ranks the query-derived effects. After consent,
+the mutation is a parameterized `MATCH ... WHERE type(rel) = $ty DELETE rel` for one
+exact edge. All permissions and resources are synthetic; there is no cloud API call.
 
 ## Benchmark
 
@@ -48,35 +162,62 @@ detaching that policy closes the path and leaves every legitimate user's access 
 | broker_policy | ✓ | ✓ | 0 | 0 |
 | exposed_secret | ✓ | ✓ | 0 | 0 |
 
-**B. Engine vs. the same model with no tools.** The baseline gets the raw node and edge list in
-its prompt, plus the same objective and tie-break rule. Results are from 3 runs per scenario
-(`--llm-runs 3`), on graphs of about 65 nodes.
+**B. Deterministic engine vs. tool-less Sonnet 5.5.** The baseline gets the raw node and edge
+list in its prompt, plus the same objective and tie-break rule. This run used
+`claude-sonnet-5-5` via the API on 2026-10-18, with 10 independent calls per scenario
+(`--llm-runs 10 --baseline-scale 10`): 40 calls on graphs of 479–485 nodes and 540–547 edges.
+Engine rows repeat the deterministic path query and planner, without LLM calls.
 
-| scenario | condition | exact path | fix edge | same answer across runs | hallucinated edges |
-|---|---|---|---|---|---|
-| public_bucket | engine | 100% | 100% | 100% | 0% |
-| public_bucket | llm_no_tools | 100% | 100% | 100% | 0% |
-| escalation_chain | engine | 100% | 100% | 100% | 0% |
-| escalation_chain | llm_no_tools | 100% | **0%** | 100% | 0% |
-| broker_policy | engine | 100% | 100% | 100% | 0% |
-| broker_policy | llm_no_tools | 100% | 100% | 100% | 0% |
-| exposed_secret | engine | 100% | 100% | 100% | 0% |
-| exposed_secret | llm_no_tools | 100% | 100% | 100% | 0% |
+| scenario | condition | exact path | fix edge | same answer across runs | hallucinated edges | failed runs |
+|---|---|---|---|---|---|---|
+| public_bucket | engine | 100% | 100% | 100% | 0% | 0/10 |
+| public_bucket | llm_no_tools | 100% | 100% | 100% | 0% | 0/10 |
+| escalation_chain | engine | 100% | 100% | 100% | 0% | 0/10 |
+| escalation_chain | llm_no_tools | 100% | **0%** | 100% | 0% | 0/10 |
+| broker_policy | engine | 100% | 100% | 100% | 0% | 0/10 |
+| broker_policy | llm_no_tools | 100% | **70%** | **70%** | 0% | 0/10 |
+| exposed_secret | engine | 100% | 100% | 100% | 0% | 0/10 |
+| exposed_secret | llm_no_tools | 100% | 100% | 100% | 0% | 0/10 |
 
-At this size the tool-less model reads the graph well: it found every exact path and invented no
-edges. On the 6-hop `escalation_chain` it consistently cut `deploy-role -CAN_ASSUME-> admin-role`
-instead of the policy. That edge is the engine's own runner-up: it closes the path too and ties on
-broker score, but ranks lower on specificity. To see how the gap changes with graph size, run
-`bragent benchmark --baseline-scale 10`, which gives about 500 nodes.
+Sonnet found every exact path and invented no edges. Its fix matched the planted edge in
+27/40 calls (67.5%), compared with 40/40 for the engine. On the 6-hop `escalation_chain`,
+all 10 calls cut `deploy-role -CAN_ASSUME-> admin-role` instead of detaching `IAMFullAccess`
+from `admin-role`. On `broker_policy`, 7 calls detached the shared DB policy from the sandbox
+role; 3 revoked the vendor's ability to assume that role. Fix accuracy measures the exact
+expected edge under the planner's ranking. Both alternative cuts also close external access
+to the target with zero internal collateral; the misses reflect the edge ranking.
+
+The observed gap is in fix selection, including variation on `broker_policy`; this run does
+not show path errors or hallucinated edges. [Full results](results/baseline_scale10.md),
+[per-scenario metrics](results/baseline_scale10.json), and
+[raw answers and checkpoint](results/baseline_scale10.runs.json) are saved. The earlier
+[3-run small-graph comparison](results/baseline.md) remains available. Its artifacts do not
+record the model, so these runs do not isolate graph size as a variable.
+
+Reproduce the larger comparison with 10 calls per scenario (40 total), or use `--llm-runs 5`
+for half as many calls:
+
+```bash
+.venv/bin/bragent benchmark --llm-runs 10 --baseline-scale 10
+# After an interruption, reuse saved calls with the same options:
+.venv/bin/bragent benchmark --llm-runs 10 --baseline-scale 10 --resume
+```
+
+Scale 10 writes `results/baseline_scale10.json` and `.md`, leaving the small-graph baseline
+intact. Each completed call, including its raw answer or error, is saved atomically in
+`results/baseline_scale10.runs.json`; summaries are updated after each scenario. `--resume`
+fills missing calls and retains recorded failures. A fresh run without `--resume` starts a
+new comparison. Failed calls and malformed answers count as accuracy and stability misses;
+hallucinated-edge rates use valid answers only, with failures reported separately.
 
 **C. Scale.** This is the median latency over 5 runs on `escalation_chain`, with the decoy org
 scaled up.
 
 | nodes | edges | find_reachers | shortest_external_path |
 |---|---|---|---|
-| 113 | 128 | 0.9 ms | 0.6 ms |
-| 963 | 1,096 | 0.6 ms | 0.7 ms |
-| 9,421 | 10,748 | 0.7 ms | 1.0 ms |
+| 113 | 128 | 0.6 ms | 0.4 ms |
+| 963 | 1,096 | 0.4 ms | 0.4 ms |
+| 9,421 | 10,748 | 0.4 ms | 0.6 ms |
 
 ![scale](results/scale.png)
 
@@ -125,9 +266,9 @@ on a graph copy and ranks them by these keys, in order:
    `HAS_ROLE`/`CAN_ASSUME`, `PERMITS`, `TARGETS`
 6. edge id, as a stable final tie-break
 
-Keys 4 and 5 are what make `escalation_chain` and `broker_policy` choose the deep broker, where
-the naive "cut hop 1" answer is wrong. If the runner-up ties on keys 1–3, the approval prompt
-shows it as an alternative.
+Keys 4 and 5 make `escalation_chain` and `broker_policy` prefer the deep broker over hop 1.
+Both may block the exposure, but the broker cut ranks higher under the declared policy.
+If the runner-up ties on keys 1–3, the approval prompt shows it as an alternative.
 
 ## Architecture
 
@@ -151,18 +292,64 @@ The agent calls the tools in this order: `get_finding_context` → `find_reacher
 
 ## Run it
 
+Requirements: Python 3.11+, [uv](https://docs.astral.sh/uv/getting-started/installation/),
+Docker with Compose, and an Anthropic API key or authenticated Claude Code session for
+the agent. Tests, graph inspection, and deterministic benchmarks work without an LLM key.
+No hosted deployment is required; the complete application runs locally.
+
 ```bash
-uv venv -p 3.11 .venv && uv pip install -p .venv -e '.[dev,bench]'
-cp .env.example .env            # FalkorDB on host port 6380
-make up                          # docker compose up -d
-make demo                        # seed escalation_chain + full loop (auto-approve)
-.venv/bin/bragent investigate --scenario broker_policy    # real y/N prompt
-make test                        # agent e2e runs only with ANTHROPIC_API_KEY or BRAGENT_RUN_AGENT=1
-make bench
+git clone https://github.com/mohi-devhub/Severance.git
+cd Severance
+uv sync --locked --all-extras --python 3.11
+cp .env.example .env              # first setup only; preserve an existing .env
+# Set ANTHROPIC_API_KEY and, if needed, MODEL in .env before agent commands.
+make up                           # pinned FalkorDB, waits for a healthy database
+make test                         # deterministic tests; no paid API calls
+make lint
+.venv/bin/bragent demo             # real agent loop; synthetic demo auto-approval
+.venv/bin/bragent investigate --scenario broker_policy  # real y/N in a terminal
+make test-agent                   # opt-in paid approve/reject integration tests
+make bench-engine                 # correctness + scale; no paid API calls
+# make bench                      # defaults to 40 paid tool-less baseline calls
 ```
 
 The agent authenticates through the Claude Agent SDK, using either `ANTHROPIC_API_KEY` or a
-logged-in Claude Code.
+logged-in Claude Code. The API key can be exported in the shell or set in the ignored `.env`
+file; a configured API key is passed to the SDK for both investigations and benchmarks.
+
+The checked-in `uv.lock` reproduces dependencies. Docker Compose pins the verified
+FalkorDB 4.22.1 image by its multi-platform digest and binds port 6380 to localhost.
+The graph is disposable in this local setup; use `seed` to recreate any scenario.
+If 6380 is occupied, choose a free `FALKOR_PORT` in `.env`. `make up` and the client
+read the same setting. `demo` and `investigate --scenario` replace their active synthetic
+graph, while tests and benchmarks use separate graph names.
+
+For a judge without API credentials, `make test` verifies the graph queries, planner,
+dry-run and approval gates. The recorded demo and audit show the real MCP agent loop.
+GitHub Actions runs lint, formatting, the deterministic suite against FalkorDB, and a
+wheel/source build on every push; no LLM secret is needed for CI.
+
+## Scope and AI assistance
+
+This submission enters **Track 01 only**. It demonstrates decisions and actions over
+connected IAM data; it does not implement cross-session conversational memory,
+multi-agent coordination, or a company knowledge graph.
+
+The data is entirely synthetic, with four planted scenarios. Exact-edge benchmark
+accuracy checks the declared ranking policy, and the query scale test uses disconnected
+decoys; neither is a claim of production cloud coverage. Shortest paths are the
+explanations shown, rather than an enumeration of every possible exploit path.
+
+**AI coding disclosure:** Claude Code assisted the initial implementation. OpenAI Codex
+assisted with benchmark recovery, failure handling, tests, documentation, build/CI,
+and submission preparation. The demo composition was built with HyperFrames. All reported
+benchmark numbers come from recorded runs; deterministic tests and live approve/reject
+agent tests verify the implementation. The model selects tools and explains their outputs;
+it is not the source of graph facts or scores.
+
+The [official submission rules](https://www.wemakedevs.org/hackathons/falkordb/rules)
+require a public repository and a demo video. This repository remains private at the
+team leader's request; change its visibility before submitting. See [submission notes](SUBMISSION.md).
 
 ## Implementation notes
 

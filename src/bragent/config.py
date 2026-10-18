@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     falkor_port: int = 6380
     graph_name: str = "iam"
     anthropic_api_key: str = ""
-    model: str = "claude-opus-5-5"
+    model: str = "claude-sonnet-5-5"
     max_hops: int = 6
     audit_dir: str = "audit"
 

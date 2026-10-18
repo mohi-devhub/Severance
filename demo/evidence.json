@@ -1,0 +1,33 @@
+{
+  "source": "demo/audit.jsonl",
+  "run_id": "run-f96994",
+  "model": "claude-sonnet-5-5",
+  "chosen_edge": {
+    "from_id": "role-admin",
+    "type": "GRANTS",
+    "to_id": "pol-iam-full"
+  },
+  "justifying_path": [
+    "ext-guest",
+    "role-build",
+    "role-deploy",
+    "role-admin",
+    "pol-iam-full",
+    "iam:AttachRolePolicy@res-prod-db",
+    "res-prod-db"
+  ],
+  "before": {
+    "reachers": 4,
+    "external_reachers": 1,
+    "shortest_external_hops": 6,
+    "severity": 18.0
+  },
+  "after": {
+    "reachers": 3,
+    "external_reachers": 0,
+    "shortest_external_hops": null,
+    "severity": 12.0
+  },
+  "collateral": [],
+  "result": "applied"
+}

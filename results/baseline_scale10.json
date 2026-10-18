@@ -1,0 +1,232 @@
+[
+  {
+    "scenario": "public_bucket",
+    "condition": "engine",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 479,
+    "edges": 540,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-anon",
+        "role-ci",
+        "pol-ci-deploy",
+        "s3:PutObject@res-prod-artifacts",
+        "res-prod-artifacts"
+      ],
+      {
+        "from_id": "ext-anon",
+        "to_id": "role-ci",
+        "type": "CAN_ASSUME"
+      }
+    ]
+  },
+  {
+    "scenario": "public_bucket",
+    "condition": "llm_no_tools",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 479,
+    "edges": 540,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-anon",
+        "role-ci",
+        "pol-ci-deploy",
+        "s3:PutObject@res-prod-artifacts",
+        "res-prod-artifacts"
+      ],
+      {
+        "from_id": "ext-anon",
+        "to_id": "role-ci",
+        "type": "CAN_ASSUME"
+      }
+    ]
+  },
+  {
+    "scenario": "escalation_chain",
+    "condition": "engine",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 483,
+    "edges": 547,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-guest",
+        "role-build",
+        "role-deploy",
+        "role-admin",
+        "pol-iam-full",
+        "iam:AttachRolePolicy@res-prod-db",
+        "res-prod-db"
+      ],
+      {
+        "from_id": "role-admin",
+        "to_id": "pol-iam-full",
+        "type": "GRANTS"
+      }
+    ]
+  },
+  {
+    "scenario": "escalation_chain",
+    "condition": "llm_no_tools",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 483,
+    "edges": 547,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 0.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-guest",
+        "role-build",
+        "role-deploy",
+        "role-admin",
+        "pol-iam-full",
+        "iam:AttachRolePolicy@res-prod-db",
+        "res-prod-db"
+      ],
+      {
+        "from_id": "role-deploy",
+        "to_id": "role-admin",
+        "type": "CAN_ASSUME"
+      }
+    ]
+  },
+  {
+    "scenario": "broker_policy",
+    "condition": "engine",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 485,
+    "edges": 546,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-vendor",
+        "role-sandbox",
+        "pol-db-shared",
+        "rds:ExecuteStatement@res-customer-db",
+        "res-customer-db"
+      ],
+      {
+        "from_id": "role-sandbox",
+        "to_id": "pol-db-shared",
+        "type": "GRANTS"
+      }
+    ]
+  },
+  {
+    "scenario": "broker_policy",
+    "condition": "llm_no_tools",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 485,
+    "edges": 546,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 0.7,
+    "stability": 0.7,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-vendor",
+        "role-sandbox",
+        "pol-db-shared",
+        "rds:ExecuteStatement@res-customer-db",
+        "res-customer-db"
+      ],
+      {
+        "from_id": "role-sandbox",
+        "to_id": "pol-db-shared",
+        "type": "GRANTS"
+      }
+    ]
+  },
+  {
+    "scenario": "exposed_secret",
+    "condition": "engine",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 480,
+    "edges": 541,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-contractor",
+        "grp-ops",
+        "role-batch",
+        "pol-batch-secrets",
+        "secretsmanager:GetSecretValue@res-cluster-creds",
+        "res-cluster-creds"
+      ],
+      {
+        "from_id": "ext-contractor",
+        "to_id": "grp-ops",
+        "type": "MEMBER_OF"
+      }
+    ]
+  },
+  {
+    "scenario": "exposed_secret",
+    "condition": "llm_no_tools",
+    "model": "claude-sonnet-5-5",
+    "graph_scale": 10,
+    "nodes": 480,
+    "edges": 541,
+    "runs": 10,
+    "failed_runs": 0,
+    "path_acc": 1.0,
+    "fix_acc": 1.0,
+    "stability": 1.0,
+    "hallucination_rate": 0.0,
+    "modal_answer": [
+      [
+        "ext-contractor",
+        "grp-ops",
+        "role-batch",
+        "pol-batch-secrets",
+        "secretsmanager:GetSecretValue@res-cluster-creds",
+        "res-cluster-creds"
+      ],
+      {
+        "from_id": "ext-contractor",
+        "to_id": "grp-ops",
+        "type": "MEMBER_OF"
+      }
+    ]
+  }
+]

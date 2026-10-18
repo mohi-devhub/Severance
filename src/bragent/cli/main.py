@@ -3,6 +3,7 @@
 import asyncio
 import json
 import subprocess
+import sys
 import time
 from typing import Any
 
@@ -159,10 +160,17 @@ def _investigate(finding: Finding, auto_approve: bool, verbose: bool) -> None:
         if verbose:
             console.print(f"[dim italic]agent: {text}[/]")
 
+    approver = auto_approver if auto_approve else interactive_approver
+    if not auto_approve and not sys.stdin.isatty():
+        from bragent.agent.tools import reject_all
+
+        approver = reject_all
+        console.print("Non-interactive input: remediation approval defaults to rejection.")
+
     res = asyncio.run(
         runner.run(
             finding,
-            approver=auto_approver if auto_approve else interactive_approver,
+            approver=approver,
             on_text=on_text,
             on_result=render_result,
         )
@@ -176,6 +184,8 @@ def _investigate(finding: Finding, auto_approve: bool, verbose: bool) -> None:
         console.print(f"No changes made. Investigation logged: {res.audit_path}")
     if not res.success:
         console.print("[red]agent run did not complete successfully[/]")
+        if res.error:
+            console.print(res.error, markup=False)
         raise typer.Exit(1)
 
 
@@ -238,13 +248,21 @@ def demo(auto_approve: bool = typer.Option(True, help="auto-walk the approval"))
 
 @app.command()
 def benchmark(
-    llm_runs: int = typer.Option(10, help="tool-less LLM baseline runs per scenario (0 = skip)"),
-    baseline_scale: int = typer.Option(1, help="decoy-org multiplier for the LLM baseline graph"),
+    llm_runs: int = typer.Option(10, min=0, help="tool-less LLM runs per scenario (0 = skip)"),
+    baseline_scale: int = typer.Option(
+        1, min=1, help="decoy-org multiplier for the baseline graph"
+    ),
+    resume: bool = typer.Option(False, help="resume saved baseline calls with matching options"),
 ) -> None:
     """Correctness table, engine vs tool-less LLM, and the scale plot → results/."""
     from bragent.bench import run_all
 
-    out = run_all(llm_runs, baseline_scale, log=console.print)
+    if resume and not llm_runs:
+        raise typer.BadParameter("--resume requires --llm-runs greater than zero")
+    try:
+        out = run_all(llm_runs, baseline_scale, log=console.print, resume=resume)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
     console.print(f"[green]✓[/] results written to {out}/")
 
 

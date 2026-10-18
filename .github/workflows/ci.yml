@@ -1,0 +1,34 @@
+name: checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      falkordb:
+        image: falkordb/falkordb@sha256:b0bdcac2cbaff989e77cb0610439b7a9289e86de033ccbbd4368b66fb680ae7a
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          version: '0.9.7'
+          enable-cache: true
+      - run: uv sync --locked --all-extras --python 3.11
+      - run: uv run --locked ruff check .
+      - run: uv run --locked ruff format --check .
+      - name: Require the graph database
+        run: uv run --locked python -c 'from bragent.graph.client import db; assert db().connection.ping()'
+      - run: uv run --locked pytest -q -m 'not agent'
+      - run: uv build

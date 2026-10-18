@@ -85,3 +85,20 @@ def test_unknown_resource_is_error(seeded):
     err, msg = call("get_finding_context", resource_name="nope")
     tools._session.reset(tok)
     assert err and "nope" in msg
+
+
+@pytest.mark.parametrize("seeded", ["public_bucket"], indirect=True)
+def test_rejection_revokes_previous_consent(seeded):
+    tok = _session(seeded, approve=True)
+    try:
+        _, plan = call("propose_remediation", resource_id=seeded.target_resource_id)
+        pid = plan["plan_id"]
+        call("simulate_remediation", plan_id=pid)
+        _, approval = call("request_approval", plan_id=pid)
+        tools._session.get().approver = tools.reject_all
+        _, rejected = call("request_approval", plan_id=pid)
+        assert not rejected["approved"]
+        err, _ = call("apply_remediation", plan_id=pid, token=approval["token"])
+        assert err and queries.edge_exists(seeded.expected_fix_edge)
+    finally:
+        tools._session.reset(tok)

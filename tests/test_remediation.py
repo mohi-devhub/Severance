@@ -57,3 +57,100 @@ def test_planner_no_external_path():
     t = seed("public_bucket")
     queries.delete_edge(t.expected_fix_edge)
     assert planner.choose(t.target_resource_id) is None
+
+
+def _plan_and_dryrun(t):
+    from bragent.remediation import dryrun
+
+    plan = planner.choose(t.target_resource_id)
+    return plan, dryrun.simulate(plan)
+
+
+def _snapshot(t):
+    from bragent.graph import queries
+
+    return queries.graph_counts(), [
+        r.principal.id for r in queries.find_reachers(t.target_resource_id)
+    ]
+
+
+@graph
+@pytest.mark.parametrize("seeded", ALL_SCENARIOS, indirect=True)
+def test_dryrun(seeded):
+    before = _snapshot(seeded)
+    plan, dr = _plan_and_dryrun(seeded)
+    assert dr.before.external_reacher_count >= 1
+    assert dr.after.external_reacher_count == 0 and dr.after.shortest_external_hops is None
+    assert dr.collateral == []
+    assert [p.ids for p in dr.paths_closed] == [seeded.expected_external_path_ids]
+    assert set(seeded.legit_reachers_after_fix) <= set(dr.after.internal_reacher_ids)
+    assert _snapshot(seeded) == before  # live graph untouched
+
+
+@graph
+@pytest.mark.parametrize("seeded", ["escalation_chain"], indirect=True)
+def test_apply_without_token_refuses(seeded):
+    from bragent.audit.log import AuditLog
+    from bragent.remediation import apply
+
+    before = _snapshot(seeded)
+    plan, dr = _plan_and_dryrun(seeded)
+    log = AuditLog()
+    assert apply.apply(plan, "forged", log, dr)["result"] == "refused"
+    other = plan.model_copy(
+        update={"edge": seeded.expected_fix_edge.model_copy(update={"to_id": "x"})}
+    )
+    assert apply.apply(plan, apply.issue_token(other), log, dr)["result"] == "refused"
+    assert _snapshot(seeded) == before
+    assert [r["result"] for r in log.records()] == ["refused", "refused"]
+
+
+@graph
+@pytest.mark.parametrize("seeded", ["escalation_chain"], indirect=True)
+def test_apply_with_token_deletes_exactly_the_edge(seeded):
+    from bragent.audit.log import AuditLog
+    from bragent.graph import queries
+    from bragent.remediation import apply
+
+    counts = queries.graph_counts()
+    plan, dr = _plan_and_dryrun(seeded)
+    log = AuditLog()
+    token = apply.issue_token(plan)
+    assert apply.apply(plan, token, log, dr) == {"result": "applied", "deleted": 1}
+    assert queries.graph_counts() == {"nodes": counts["nodes"], "edges": counts["edges"] - 1}
+    assert not queries.edge_exists(seeded.expected_fix_edge)
+    assert queries.shortest_external_path(seeded.target_resource_id) is None
+    assert apply.apply(plan, token, log, dr)["result"] == "refused"  # single use
+
+    rec = log.records()[0]
+    assert rec["result"] == "applied"
+    assert rec["justifying_path"] == seeded.expected_external_path_ids
+    assert rec["edge"] == seeded.expected_fix_edge.model_dump()
+    assert rec["blast_radius_before"]["external_reachers"] == dr.before.external_reacher_count
+    assert rec["blast_radius_after"] == {
+        "reachers": dr.after.reacher_count,
+        "external_reachers": 0,
+        "shortest_external_hops": None,
+        "severity": dr.after.severity,
+    }
+
+
+@graph
+@pytest.mark.parametrize("seeded", ["public_bucket"], indirect=True)
+def test_stale_apply_aborts(seeded):
+    from bragent.audit.log import AuditLog
+    from bragent.graph import queries
+    from bragent.remediation import apply
+
+    plan, dr = _plan_and_dryrun(seeded)
+    queries.delete_edge(plan.edge)  # graph drifts after the dry-run
+    log = AuditLog()
+    assert apply.apply(plan, apply.issue_token(plan), log, dr)["result"] == "stale_aborted"
+    assert log.records()[0]["result"] == "stale_aborted"
+
+
+def test_audit_refuses_unjustified_mutation():
+    from bragent.audit.log import AuditLog
+
+    with pytest.raises(ValueError):
+        AuditLog().record("apply_remediation", result="applied", justifying_path=[])

@@ -75,7 +75,7 @@ class BlastRadius(BaseModel):
     shortest_external_path: GraphPath | None
     shortest_external_hops: int | None
     top_brokers: list[Broker]
-    reacher_ids: list[str] = []
+    internal_reacher_ids: list[str] = []
     severity: float = 0.0
 
 

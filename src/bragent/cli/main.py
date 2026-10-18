@@ -237,6 +237,18 @@ def demo(auto_approve: bool = typer.Option(True, help="auto-walk the approval"))
 
 
 @app.command()
+def benchmark(
+    llm_runs: int = typer.Option(10, help="tool-less LLM baseline runs per scenario (0 = skip)"),
+    baseline_scale: int = typer.Option(1, help="decoy-org multiplier for the LLM baseline graph"),
+) -> None:
+    """Correctness table, engine vs tool-less LLM, and the scale plot → results/."""
+    from bragent.bench import run_all
+
+    out = run_all(llm_runs, baseline_scale, log=console.print)
+    console.print(f"[green]✓[/] results written to {out}/")
+
+
+@app.command()
 def reset() -> None:
     """Delete everything in the graph."""
     queries.wipe()

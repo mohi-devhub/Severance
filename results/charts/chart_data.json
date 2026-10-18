@@ -1,0 +1,321 @@
+{
+  "baseline": [
+    {
+      "scenario": "public_bucket",
+      "condition": "engine",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 479,
+      "edges": 540,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-anon",
+          "role-ci",
+          "pol-ci-deploy",
+          "s3:PutObject@res-prod-artifacts",
+          "res-prod-artifacts"
+        ],
+        {
+          "from_id": "ext-anon",
+          "to_id": "role-ci",
+          "type": "CAN_ASSUME"
+        }
+      ]
+    },
+    {
+      "scenario": "public_bucket",
+      "condition": "llm_no_tools",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 479,
+      "edges": 540,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-anon",
+          "role-ci",
+          "pol-ci-deploy",
+          "s3:PutObject@res-prod-artifacts",
+          "res-prod-artifacts"
+        ],
+        {
+          "from_id": "ext-anon",
+          "to_id": "role-ci",
+          "type": "CAN_ASSUME"
+        }
+      ]
+    },
+    {
+      "scenario": "escalation_chain",
+      "condition": "engine",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 483,
+      "edges": 547,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-guest",
+          "role-build",
+          "role-deploy",
+          "role-admin",
+          "pol-iam-full",
+          "iam:AttachRolePolicy@res-prod-db",
+          "res-prod-db"
+        ],
+        {
+          "from_id": "role-admin",
+          "to_id": "pol-iam-full",
+          "type": "GRANTS"
+        }
+      ]
+    },
+    {
+      "scenario": "escalation_chain",
+      "condition": "llm_no_tools",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 483,
+      "edges": 547,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 0.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-guest",
+          "role-build",
+          "role-deploy",
+          "role-admin",
+          "pol-iam-full",
+          "iam:AttachRolePolicy@res-prod-db",
+          "res-prod-db"
+        ],
+        {
+          "from_id": "role-deploy",
+          "to_id": "role-admin",
+          "type": "CAN_ASSUME"
+        }
+      ]
+    },
+    {
+      "scenario": "broker_policy",
+      "condition": "engine",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 485,
+      "edges": 546,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-vendor",
+          "role-sandbox",
+          "pol-db-shared",
+          "rds:ExecuteStatement@res-customer-db",
+          "res-customer-db"
+        ],
+        {
+          "from_id": "role-sandbox",
+          "to_id": "pol-db-shared",
+          "type": "GRANTS"
+        }
+      ]
+    },
+    {
+      "scenario": "broker_policy",
+      "condition": "llm_no_tools",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 485,
+      "edges": 546,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 0.7,
+      "stability": 0.7,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-vendor",
+          "role-sandbox",
+          "pol-db-shared",
+          "rds:ExecuteStatement@res-customer-db",
+          "res-customer-db"
+        ],
+        {
+          "from_id": "role-sandbox",
+          "to_id": "pol-db-shared",
+          "type": "GRANTS"
+        }
+      ]
+    },
+    {
+      "scenario": "exposed_secret",
+      "condition": "engine",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 480,
+      "edges": 541,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-contractor",
+          "grp-ops",
+          "role-batch",
+          "pol-batch-secrets",
+          "secretsmanager:GetSecretValue@res-cluster-creds",
+          "res-cluster-creds"
+        ],
+        {
+          "from_id": "ext-contractor",
+          "to_id": "grp-ops",
+          "type": "MEMBER_OF"
+        }
+      ]
+    },
+    {
+      "scenario": "exposed_secret",
+      "condition": "llm_no_tools",
+      "model": "claude-sonnet-5-5",
+      "graph_scale": 10,
+      "nodes": 480,
+      "edges": 541,
+      "runs": 10,
+      "failed_runs": 0,
+      "path_acc": 1.0,
+      "fix_acc": 1.0,
+      "stability": 1.0,
+      "hallucination_rate": 0.0,
+      "modal_answer": [
+        [
+          "ext-contractor",
+          "grp-ops",
+          "role-batch",
+          "pol-batch-secrets",
+          "secretsmanager:GetSecretValue@res-cluster-creds",
+          "res-cluster-creds"
+        ],
+        {
+          "from_id": "ext-contractor",
+          "to_id": "grp-ops",
+          "type": "MEMBER_OF"
+        }
+      ]
+    }
+  ],
+  "public_workflows": [
+    {
+      "case": "role_write",
+      "before": 1,
+      "after": 0,
+      "elapsed_s": 20.577337958005955,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 0.8160419965861365
+    },
+    {
+      "case": "group_write",
+      "before": 1,
+      "after": 0,
+      "elapsed_s": 23.071555583999725,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 1.4748749963473529
+    },
+    {
+      "case": "group_acl",
+      "before": 1,
+      "after": 0,
+      "elapsed_s": 23.17523591699137,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 1.8645829986780882
+    },
+    {
+      "case": "role_write_rejected",
+      "before": 1,
+      "after": 1,
+      "elapsed_s": 20.10084708299837,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 2.7857079985551536
+    },
+    {
+      "case": "explicit_deny",
+      "before": 0,
+      "after": 0,
+      "elapsed_s": 15.110669333997066,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 0.37850000080652535
+    },
+    {
+      "case": "split_policy_deny",
+      "before": 0,
+      "after": 0,
+      "elapsed_s": 14.740949208004167,
+      "agent_passed": true,
+      "engine_passes": 5,
+      "engine_runs": 5,
+      "median_path_ms": 0.5466660077217966
+    }
+  ],
+  "query_scaling": [
+    {
+      "nodes": 113.0,
+      "edges": 128.0,
+      "find_reachers_ms": 0.5804170068586245,
+      "shortest_external_path_ms": 0.442666991148144
+    },
+    {
+      "nodes": 963.0,
+      "edges": 1096.0,
+      "find_reachers_ms": 0.39329100400209427,
+      "shortest_external_path_ms": 0.3508340014377609
+    },
+    {
+      "nodes": 9421.0,
+      "edges": 10748.0,
+      "find_reachers_ms": 0.4184589924989268,
+      "shortest_external_path_ms": 0.5696250009350479
+    }
+  ],
+  "source_sha256": {
+    "baseline_scale10.json": "b580b6ba007694248bf956b5afdb6573a4261ff7c7deee3834df9e91693a1c71",
+    "public_iam.json": "1d099ca2acf710fef3da072d12e0b449c83beb62f010843d24d3817addb90d43",
+    "scale.csv": "ea6cc5172b219ebad262d41b8c9d39df40e8ae20e01ac87f2f48a32d0308b1b1"
+  }
+}

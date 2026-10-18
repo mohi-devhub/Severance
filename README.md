@@ -195,6 +195,11 @@ Positive cases simulate 1 → 0 untrusted reachers with zero collateral among su
 principals. Approved runs delete exactly one graph edge; the rejection and deny controls
 preserve the graph. All six final agent runs complete without tool errors.
 
+![Public IAM workflow outcomes and measured full-agent runtimes](results/charts/public_workflows.png)
+
+The bars show access in the active graph after the actual approval decision, rather
+than only the simulated result. Each duration is one observed full-agent run.
+
 | Case | Engine checks | Live agent | Path | Result |
 |---|---|---|---|---|
 | EC2 role: S3 write | 5/5 | 1/1 | 4 hops | Policy detached; assessed untrusted access closed |
@@ -243,6 +248,8 @@ list in its prompt, plus the same objective and tie-break rule. This run used
 `claude-sonnet-5-5` via the API on 2026-10-18, with 10 independent calls per scenario
 (`--llm-runs 10 --baseline-scale 10`): 40 calls on graphs of 479–485 nodes and 540–547 edges.
 Engine rows repeat the deterministic path query and planner, without LLM calls.
+
+![Exact path and expected-fix agreement: deterministic engine versus tool-less Sonnet 5.5](results/charts/baseline_comparison.png)
 
 | scenario | condition | exact path | fix edge | same answer across runs | hallucinated edges | failed runs |
 |---|---|---|---|---|---|---|
@@ -295,11 +302,15 @@ scaled up.
 | 963 | 1,096 | 0.4 ms | 0.4 ms |
 | 9,421 | 10,748 | 0.4 ms | 0.6 ms |
 
-![scale](results/scale.png)
+![Median query latency versus graph size, with a logarithmic node-count axis](results/charts/query_scaling.png)
 
 Both queries start from an indexed node and walk outward, so their cost follows the size of the
 reachable neighbourhood, not the whole graph. The seeded decoys never connect to the target, so
 this measures that best case.
+
+The figures are generated from the recorded JSON/CSV files with `make charts`; this
+does not call an LLM or rerun benchmarks. High-resolution PNGs, SVGs and the plotted
+data with source checksums are in [results/charts](results/charts/README.md).
 
 ## How it stays safe: the four invariants
 

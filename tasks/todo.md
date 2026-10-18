@@ -36,3 +36,5 @@
   source checksum and submission-note links; preserve the video-free README.
 - [x] Review all 18 official rules and the Code of Conduct; map project evidence and
   participant-owned obligations in SUBMISSION.md. Short disclosure: Codex was used for development.
+- [x] Add reproducible PNG/SVG benchmark charts from saved artifacts to the README;
+  retain sample sizes, ranking caveats, actual approval outcomes and scale limits.

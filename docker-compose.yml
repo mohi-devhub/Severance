@@ -1,0 +1,5 @@
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports:
+      - "${FALKOR_PORT:-6380}:6379"

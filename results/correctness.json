@@ -1,0 +1,30 @@
+[
+  {
+    "scenario": "public_bucket",
+    "found_external_path": true,
+    "chose_root_cause_fix": true,
+    "external_reachers_after": 0,
+    "collateral": 0
+  },
+  {
+    "scenario": "escalation_chain",
+    "found_external_path": true,
+    "chose_root_cause_fix": true,
+    "external_reachers_after": 0,
+    "collateral": 0
+  },
+  {
+    "scenario": "broker_policy",
+    "found_external_path": true,
+    "chose_root_cause_fix": true,
+    "external_reachers_after": 0,
+    "collateral": 0
+  },
+  {
+    "scenario": "exposed_secret",
+    "found_external_path": true,
+    "chose_root_cause_fix": true,
+    "external_reachers_after": 0,
+    "collateral": 0
+  }
+]

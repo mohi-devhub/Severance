@@ -57,7 +57,13 @@ def _frame(fig, title, subtitle, footer):
 def _save(fig, name):
     for extension in ("png", "svg"):
         kwargs = {"dpi": 200} if extension == "png" else {"metadata": {"Date": None}}
-        fig.savefig(OUTPUT / f"{name}.{extension}", facecolor=BG, **kwargs)
+        path = OUTPUT / f"{name}.{extension}"
+        fig.savefig(path, facecolor=BG, **kwargs)
+        if extension == "svg":
+            # Matplotlib leaves spaces before path-data line breaks.
+            path.write_text(
+                "\n".join(line.rstrip() for line in path.read_text().splitlines()) + "\n"
+            )
     plt.close(fig)
 
 

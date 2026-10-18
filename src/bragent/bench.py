@@ -298,8 +298,9 @@ def run_all(llm_runs: int, baseline_scale: int = 1, log=print) -> Path:
                     f"scale {baseline_scale}) …"
                 )
                 b = baseline(llm_runs, baseline_scale)
-                (RESULTS / "baseline.json").write_text(json.dumps(b, indent=2))
-                (RESULTS / "baseline.md").write_text(baseline_md(b) + "\n")
+                stem = "baseline" if baseline_scale == 1 else f"baseline_scale{baseline_scale}"
+                (RESULTS / f"{stem}.json").write_text(json.dumps(b, indent=2))
+                (RESULTS / f"{stem}.md").write_text(baseline_md(b) + "\n")
                 log(baseline_md(b))
 
             log("C. scale …")

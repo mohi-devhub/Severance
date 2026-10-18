@@ -1,14 +1,15 @@
+BIN ?= .venv/bin/
 .PHONY: up seed demo test lint bench
 
 up:
 	docker compose up -d
 seed:
-	bragent seed escalation_chain
+	$(BIN)bragent seed escalation_chain
 demo:
-	bragent demo
+	$(BIN)bragent demo
 test:
-	pytest -q
+	$(BIN)pytest -q
 lint:
-	ruff check . && ruff format --check .
+	$(BIN)ruff check . && $(BIN)ruff format --check .
 bench:
-	bragent benchmark
+	$(BIN)bragent benchmark

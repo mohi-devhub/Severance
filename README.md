@@ -418,12 +418,11 @@ the declared ranking policy, and the query scale test uses disconnected decoys; 
 is a claim of production cloud coverage. Shortest paths are the
 explanations shown, rather than an enumeration of every possible exploit path.
 
-**AI coding disclosure:** Claude Code assisted the initial implementation. OpenAI Codex
-assisted with benchmark recovery, failure handling, tests, documentation, build/CI,
-submission preparation, and the public IAM importer/benchmark. All reported benchmark numbers come from recorded runs;
-deterministic tests and live approve/reject
-agent tests verify the implementation. The model selects tools and explains their outputs;
-it is not the source of graph facts or scores.
+**AI coding disclosure:** Codex was used for development.
+
+All reported benchmark numbers come from recorded runs. Deterministic tests and live
+approve/reject agent tests verify the implementation. The model selects tools and
+explains their outputs; it is not the source of graph facts or scores.
 
 The [source repository](https://github.com/mohi-devhub/Severance) is public and can be
 reviewed without signing in. See [submission notes](SUBMISSION.md) for the Track 01

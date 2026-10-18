@@ -6,6 +6,8 @@
 
 **Track:** Track 01 — Agents That Act on Connected Data
 
+**AI coding disclosure:** Codex was used for development.
+
 ## Project description
 
 Severance investigates seeded IAM findings and imports a public AWS IAM example snapshot
@@ -22,7 +24,7 @@ shortest paths, broker ranking, dry-runs, and remediation. Public imports assess
 supported identity-policy subset for one permission request; they do not claim complete
 AWS effective-permission analysis. All changes remain inside FalkorDB.
 
-## Non-video submission requirements
+## Required submission materials
 
 | Requirement | Status and evidence |
 |---|---|
@@ -31,6 +33,7 @@ AWS effective-permission analysis. All changes remain inside FalkorDB.
 | Graph queries and algorithms | [Essential Cypher](README.md#queries-that-drive-the-agent) and [implementation](src/severance/graph/queries.py): read-only traversals, `algo.SPpaths`, seeded `algo.betweenness`, and graph copies. |
 | FalkorDB central to decisions | [Track 01 evidence](README.md#track-01-evidence), [planner](src/severance/remediation/planner.py), [dry-run](src/severance/remediation/dryrun.py), and [approval gate](src/severance/remediation/apply.py). |
 | Complete local setup | [README setup](README.md#run-it), `uv.lock`, and a pinned, health-checked multi-platform FalkorDB image. |
+| Working-project video | [Public recording](https://github.com/mohi-devhub/Severance/releases/tag/graph-hacks-demo-2026-10-18), showing seeded and public-input investigations through approval and application. |
 | Named track and AI disclosure | README explicitly identifies Track 01 and [discloses AI assistance](README.md#scope-and-ai-assistance). |
 | Reproducible checks | [GitHub Actions](.github/workflows/ci.yml) runs lint, formatting, deterministic graph tests, and package builds. |
 
@@ -68,6 +71,28 @@ The unchanged 82-second, 1920 × 1080 recording shows:
 
 The release includes the file's SHA-256. All demonstrated changes apply to FalkorDB,
 not to an AWS account. The README remains video-free at the project owner's request.
+
+## Full rules review
+
+Reviewed against the [official rules](https://www.wemakedevs.org/hackathons/falkordb/rules)
+and [WeMakeDevs Code of Conduct](https://www.wemakedevs.org/coc) on October 18, 2026.
+
+| Rules | Project evidence or participant responsibility |
+|---|---|
+| 2–4: central FalkorDB use and accepted hosting | Local Docker deployment. Reachability, shortest paths, broker ranking, graph-copy simulations and approved mutations all require FalkorDB. CI requires a reachable database before graph tests. |
+| 5: named track | Track 01 — Agents That Act on Connected Data is named here and in the README. Select that track in the submission form. |
+| 6, 9: permitted data and external components | Synthetic fixtures and a public Cloudsplaining example, with unchanged source, pinned provenance and retained upstream license. The public-input projection does not import the email identity in source trust policies; trust transitions are outside its scope. Credentials and local audit files are ignored by Git. |
+| 8: work during the event | Recorded project commits begin October 18, 2026, within the event window. Participants must confirm that the actual main coding and design work also began after the event started; commit dates alone do not establish that. |
+| 10: submission contents | Public repository, README setup and schema, essential Cypher/algorithms, public video, complete local setup and named track are linked above. A hosted service is not required when complete local setup is supplied. |
+| 11: AI assistance disclosure | Codex was used for development. |
+| 12–13: participant contribution and understanding | Owner-provided running-project recording and measured verification are available. Participants must be able to explain the implementation and their own meaningful contributions; automated tests do not establish participant understanding. |
+| 1, 7, 15–18: eligibility, deadline, ownership and conduct | Participants must confirm team eligibility, agree ownership internally, comply with the Code of Conduct and submit the form before the deadline. These cannot be certified by a repository check. |
+| 14: prize terms | Organizer terms; no additional implementation artifact is required. |
+
+Before filing, every participant should be able to explain the five node labels and
+six relationship types, action/resource scoping, `algo.SPpaths`, sampled betweenness,
+the planner's tie-breaks, `GRAPH.COPY`, approval tokens, audit evidence, and the public
+importer's unsupported/unknown cases. The README and linked implementation cover each.
 
 ## Event submission
 

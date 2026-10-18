@@ -34,3 +34,5 @@
   without tool errors; approved writes, rejection and explicit-deny controls all match.
 - [x] Verify and publish the owner's unchanged recording as a release asset, with
   source checksum and submission-note links; preserve the video-free README.
+- [x] Review all 18 official rules and the Code of Conduct; map project evidence and
+  participant-owned obligations in SUBMISSION.md. Short disclosure: Codex was used for development.

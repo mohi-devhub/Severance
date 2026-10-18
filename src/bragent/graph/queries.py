@@ -10,7 +10,7 @@ from bragent.graph.client import copy_graph, drop_graph, run_ro, run_rw  # noqa:
 from bragent.graph.schema import REACH_EDGES
 from bragent.models import EDGE_TYPES, Broker, EdgeRef, GraphPath, NodeRef, Reacher, ResourceRow
 
-_NODE = "[n.id, labels(n)[0], coalesce(n.name, n.id), coalesce(n.kind, n.type)]"
+_NODE = "[n.id, labels(n)[0], coalesce(n.name, n.id), coalesce(n.kind, n.type, n.trust)]"
 
 
 def _maxlen(maxlen: int) -> int:
@@ -100,11 +100,14 @@ def path_edges(external_id: str, resource_id: str) -> list[EdgeRef]:
 
 
 def rank_brokers(limit: int = 10, only_ids: set[str] | None = None) -> list[Broker]:
-    """Betweenness over the reach subgraph (seeded, unsampled → reproducible).
+    """Betweenness over the reach subgraph, seeded → reproducible.
 
+    algo.betweenness samples source nodes with replacement; 10x the node count makes
+    a missed source unlikely (a 1x sample left the only external source unsampled).
     With `only_ids`, keep just those nodes (e.g. Roles/Policies on external paths).
     """
-    n = run_ro("MATCH (n) RETURN count(n) AS n")[0]["n"]
+    # ponytail: O(10n·m); fine to ~10^3 nodes, pass an explicit sample size if it bites
+    n = 10 * run_ro("MATCH (n) RETURN count(n) AS n")[0]["n"]
     rows = run_ro(
         "CALL algo.betweenness({relationshipTypes: $rel_types, samplingSize: $n, "
         "samplingSeed: 1337}) YIELD node, score "

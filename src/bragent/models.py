@@ -19,7 +19,7 @@ class NodeRef(BaseModel):
     id: str
     label: str
     name: str
-    kind: str | None = None  # principal kind / resource type
+    kind: str | None = None  # principal kind, resource type, or role trust
 
 
 class EdgeRef(BaseModel):

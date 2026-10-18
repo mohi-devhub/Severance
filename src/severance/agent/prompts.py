@@ -1,5 +1,7 @@
 """System prompt and the finding → first-message renderer."""
 
+import json
+
 from severance.config import settings
 from severance.models import Finding
 
@@ -35,5 +37,8 @@ def render_finding_prompt(finding: Finding) -> str:
     return (
         f"New security finding {finding.id} ({finding.kind}) on resource "
         f"'{finding.resource_name}': {finding.description}\n"
+        "Use exactly these arguments for get_finding_context: "
+        f"{json.dumps({'resource_name': finding.resource_name})}. "
+        "Do not shorten the name or extract an ARN from it.\n"
         "Investigate and remediate it following your procedure."
     )

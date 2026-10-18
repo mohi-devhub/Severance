@@ -1,0 +1,6 @@
+{
+  "id": "import-efbc1b31e96225e7",
+  "kind": "overly_permissive",
+  "resource_name": "s3:PutObject on arn:aws:s3:::mybucket/example.txt",
+  "description": "Assess s3:PutObject for an explicitly assumed compromised identity arn:aws:iam::012345678901:role/OverprivilegedEC2. This is an offline identity-policy projection, not verified live AWS access. Any remediation applies to the FalkorDB model only; unknown identities are excluded."
+}

@@ -108,12 +108,18 @@ def rank_brokers(limit: int = 10, only_ids: set[str] | None = None) -> list[Brok
     """
     # ponytail: O(10n·m); fine to ~10^3 nodes, pass an explicit sample size if it bites
     n = 10 * run_ro("MATCH (n) RETURN count(n) AS n")[0]["n"]
+    # Imported projections may contain no assume-role edges. Betweenness rejects
+    # relation names absent from the graph's schema, unlike traversal matching.
+    available = {r["relationshipType"] for r in run_ro("CALL db.relationshipTypes()")}
+    rel_types = [t for t in REACH_EDGES if t in available]
+    if not rel_types:
+        return []
     rows = run_ro(
         "CALL algo.betweenness({relationshipTypes: $rel_types, samplingSize: $n, "
         "samplingSeed: 1337}) YIELD node, score "
         "WITH node AS n, score "
         f"RETURN {_NODE} AS node, score",
-        {"rel_types": REACH_EDGES, "n": max(n, 1)},
+        {"rel_types": rel_types, "n": max(n, 1)},
     )
     brokers = [
         Broker(node=NodeRef(id=i, label=lab, name=name, kind=kind), score=r["score"])

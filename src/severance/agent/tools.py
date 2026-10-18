@@ -87,7 +87,17 @@ def _plan(s: Session, plan_id: str) -> RemediationPlan:
 
 @_audited("get_finding_context")
 def _get_finding_context(s: Session, args: dict) -> dict:
-    res = queries.get_resource_by_name(args["resource_name"])
+    name = args["resource_name"]
+    # Some models preserve JSON string delimiters around a compound name. Only
+    # unwrap an exact match to this session's finding; never fuzzy-match an ARN.
+    if name != s.finding.resource_name:
+        try:
+            decoded = json.loads(name)
+        except (json.JSONDecodeError, TypeError):
+            decoded = None
+        if decoded == s.finding.resource_name:
+            name = decoded
+    res = queries.get_resource_by_name(name)
     if res is None:
         raise ToolError(f"no resource named {args['resource_name']!r} in the graph")
     s.log.resource = res.name

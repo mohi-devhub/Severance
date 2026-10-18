@@ -88,6 +88,21 @@ def test_unknown_resource_is_error(seeded):
 
 
 @pytest.mark.parametrize("seeded", ["public_bucket"], indirect=True)
+def test_json_quoted_finding_name_resolves_exactly(seeded):
+    tok = _session(seeded, approve=False)
+    try:
+        err, ctx = call(
+            "get_finding_context", resource_name=json.dumps(seeded.finding.resource_name)
+        )
+        assert not err
+        assert ctx["resource"]["id"] == seeded.target_resource_id
+        err, _ = call("get_finding_context", resource_name=json.dumps("other-resource"))
+        assert err  # normalization never selects another resource
+    finally:
+        tools._session.reset(tok)
+
+
+@pytest.mark.parametrize("seeded", ["public_bucket"], indirect=True)
 def test_rejection_revokes_previous_consent(seeded):
     tok = _session(seeded, approve=True)
     try:

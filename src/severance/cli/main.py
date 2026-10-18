@@ -5,7 +5,8 @@ import json
 import subprocess
 import sys
 import time
-from typing import Any
+from pathlib import Path
+from typing import Annotated, Any
 
 import typer
 from rich.console import Console
@@ -226,16 +227,17 @@ def graph_stats() -> None:
 def investigate(
     scenario: str = typer.Option(None, help="seed this scenario and use its finding"),
     finding: str = typer.Option(None, help="finding JSON (uses the current graph)"),
+    finding_file: Annotated[Path | None, typer.Option(exists=True, dir_okay=False)] = None,
     auto_approve: bool = typer.Option(False, help="approve without prompting (recordings)"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="show agent commentary"),
 ) -> None:
     """Run the agent on a finding."""
-    if bool(scenario) == bool(finding):
-        raise typer.BadParameter("pass exactly one of --scenario or --finding")
+    if sum(bool(value) for value in (scenario, finding, finding_file)) != 1:
+        raise typer.BadParameter("pass exactly one of --scenario, --finding, or --finding-file")
     if scenario:
         f = seed(scenario).finding
     else:
-        data = json.loads(finding)
+        data = json.loads(finding_file.read_text() if finding_file else finding)
         data.setdefault("id", f"find-{int(time.time())}")
         f = Finding(**data)
     _investigate(f, auto_approve, verbose)
@@ -268,6 +270,58 @@ def benchmark(
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
     console.print(f"[green]✓[/] results written to {out}/")
+
+
+@app.command("import-iam")
+def import_iam(
+    snapshot: Annotated[Path, typer.Argument(exists=True, dir_okay=False)],
+    action: str = typer.Option(..., help="one concrete action, e.g. s3:PutObject"),
+    resource_arn: str = typer.Option(..., help="one concrete resource ARN"),
+    untrusted_arn: str = typer.Option(..., help="snapshot user/role assumed compromised"),
+    graph: str = typer.Option("iam_import", help="destination; must be empty"),
+    output: Annotated[Path, typer.Option(help="finding/report file prefix")] = Path(
+        "results/iam_import"
+    ),
+) -> None:
+    """Import a focused offline identity-policy projection; never contacts AWS."""
+    from severance.graph.client import db, use_graph
+    from severance.graph.iam_import import load_projection
+
+    try:
+        projection = load_projection(snapshot, action, resource_arn, untrusted_arn)
+        with use_graph(graph):
+            if graph in db().list_graphs() and queries.graph_counts()["nodes"]:
+                raise ValueError(f"graph {graph!r} is not empty; choose a new --graph name")
+            projection.write()
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.with_suffix(".finding.json").write_text(
+        projection.finding.model_dump_json(indent=2) + "\n"
+    )
+    output.with_suffix(".report.json").write_text(json.dumps(projection.report, indent=2) + "\n")
+    console.print(
+        f"Imported {projection.report['nodes']} nodes, {projection.report['edges']} edges"
+    )
+    console.print(f"Untrusted identity policy decision: {projection.report['untrusted_decision']}")
+    console.print("Offline projection only. Unknown identities excluded. No AWS changes.")
+    console.print(f"Report: {output.with_suffix('.report.json')}")
+    console.print(f"Finding: {output.with_suffix('.finding.json')} (GRAPH_NAME={graph})")
+
+
+@app.command("benchmark-public")
+def benchmark_public(
+    agent_runs: int = typer.Option(1, min=0, max=10, help="paid agent calls per case; 0 skips"),
+    engine_runs: int = typer.Option(5, min=1, help="deterministic repetitions per case"),
+    output: Annotated[Path, typer.Option()] = Path("results/public_iam"),
+) -> None:
+    """Benchmark the pinned public Cloudsplaining snapshot, with per-call checkpoints."""
+    from severance.public_bench import run
+
+    result = run(agent_runs=agent_runs, engine_runs=engine_runs, output=output, log=console.print)
+    console.print(f"Results: {output.with_suffix('.md')}")
+    if not result:
+        raise typer.Exit(1)
 
 
 @app.command()

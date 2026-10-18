@@ -8,7 +8,8 @@
 
 ## Project description
 
-Severance investigates synthetic cloud IAM security findings using FalkorDB as its
+Severance investigates seeded IAM findings and imports a public AWS IAM example snapshot
+using FalkorDB as its
 operational context. A Claude agent selects typed MCP tools to find external
 reachers, trace multi-hop privilege-escalation paths, and rank load-bearing roles
 and policies. A deterministic planner evaluates candidate edge cuts on server-side
@@ -17,7 +18,9 @@ with a single-use consent token. Plans and mutations record the justifying graph
 path and measured before/after effects in an append-only audit trail.
 
 FalkorDB supplies the decisions: removing it removes reachability analysis,
-shortest paths, broker ranking, dry-runs, and remediation. All IAM data is synthetic.
+shortest paths, broker ranking, dry-runs, and remediation. Public imports assess a
+supported identity-policy subset for one permission request; they do not claim complete
+AWS effective-permission analysis. All changes remain inside FalkorDB.
 
 ## Non-video submission requirements
 
@@ -33,7 +36,9 @@ shortest paths, broker ranking, dry-runs, and remediation. All IAM data is synth
 
 ## Verification
 
-- 86 deterministic tests passed against the existing database and a clean container.
+- 113 deterministic tests pass, including public-input paths, exact fixes, deny precedence,
+  unknown handling and compound resource-name normalization. The original 86-test suite
+  also passed against a clean pinned database container.
 - Two real Sonnet agent tests passed: approve and apply; reject and preserve the graph.
 - Ruff lint and formatting checks passed.
 - Source and wheel packages build; an isolated environment can install the wheel and
@@ -43,6 +48,13 @@ shortest paths, broker ranking, dry-runs, and remediation. All IAM data is synth
   Alternative cuts also closed exposure; this metric checks the declared edge ranking.
   [Report](results/baseline_scale10.md), [metrics](results/baseline_scale10.json), and
   [raw answers](results/baseline_scale10.runs.json) are included.
+
+- Public-snapshot benchmark: 30/30 engine evaluations and 6/6 real Sonnet MCP-agent
+  investigations pass, including rejection and two explicit-deny controls.
+- Public snapshot provenance, source-derived expectations and scoped import semantics are
+  documented in [datasets/cloudsplaining](datasets/cloudsplaining/README.md). The full-agent
+  benchmark and raw evidence are in [public_iam.md](results/public_iam.md) and
+  [public_iam.json](results/public_iam.json). Earlier lookup-error runs are retained.
 
 ## Event submission
 

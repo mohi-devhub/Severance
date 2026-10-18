@@ -1,0 +1,971 @@
+{
+  "source_counts": {
+    "UserDetailList": 44,
+    "GroupDetailList": 5,
+    "RoleDetailList": 78,
+    "Policies": 84
+  },
+  "action": "s3:PutObject",
+  "resource_arn": "arn:aws:s3:::mybucket/example.txt",
+  "untrusted_arn": "arn:aws:iam::012345678901:role/OverprivilegedEC2",
+  "untrusted_decision": "allow",
+  "nodes": 379,
+  "edges": 43,
+  "decision_counts": {
+    "implicit_deny": 109,
+    "unknown": 2,
+    "deny": 2,
+    "allow": 14
+  },
+  "identities": {
+    "arn:aws:iam::200611803367:user/fn1-privesc3-partial-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fn2-exploitableResourceConstraint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fn3-exploitableConditionConstraint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fn4-exploitableNotAction-user": {
+      "decision": "unknown",
+      "reasons": [
+        "relevant unsupported statement (conditions/negations/variables)"
+      ],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fp1-allow-and-deny-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fp2-allow-and-deny-multiple-policies-user": {
+      "decision": "deny",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/fp2-allow-all"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fp3-deny-iam-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fp4-nonExploitableResourceConstraint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/fp5-nonExploitableConditionConstraint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-AssumeRole-start-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-CloudFormationUpdateStack-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-codeBuildCreateProjectPassRole-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-ec2InstanceConnect-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-sageMakerCreateNotebookPassRole-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-sageMakerCreatePresignedNotebookURL-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-sageMakerCreateProcessingJobPassRole-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-sageMakerCreateTrainingJobPassRole-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-sre-user": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/privesc-sre-admin-policy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::200611803367:group/privesc-sre-group"
+      ]
+    },
+    "arn:aws:iam::200611803367:user/privesc-ssmSendCommand-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc-ssmStartSession-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc1-CreateNewPolicyVersion-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc10-PutUserPolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc11-PutGroupPolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::200611803367:group/privesc11-PutGroupPolicy-group"
+      ]
+    },
+    "arn:aws:iam::200611803367:user/privesc12-PutRolePolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc13-AddUserToGroup-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc14-UpdatingAssumeRolePolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc15-PassExistingRoleToNewLambdaThenInvoke-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc16-PassRoleToNewLambdaThenTriggerWithNewDynamo-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc17-EditExistingLambdaFunctionWithRole-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc18-PassExistingRoleToNewGlueDevEndpoint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc19-UpdateExistingGlueDevEndpoint-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc2-SetExistingDefaultPolicyVersion-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc20-PassExistingRoleToCloudFormation-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc21-PassExistingRoleToNewDataPipeline-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc3-CreateEC2WithExistingInstanceProfile-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc4-CreateAccessKey-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc5-CreateLoginProfile-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc6-UpdateLoginProfile-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc7-AttachUserPolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:user/privesc8-AttachGroupPolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::200611803367:group/privesc8-AttachGroupPolicy-group"
+      ]
+    },
+    "arn:aws:iam::200611803367:user/privesc9-AttachRolePolicy-user": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:user/obama": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::012345678901:group/admin"
+      ]
+    },
+    "arn:aws:iam::012345678901:user/userwithlotsofpermissions": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::012345678901:user/userwithlotsofpermissions#inline/InsecureUserPolicy",
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::012345678901:group/admin"
+      ]
+    },
+    "arn:aws:iam::012345678901:user/biden": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::012345678901:user/biden#inline/InsecureUserPolicy",
+        "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": [
+        "arn:aws:iam::012345678901:group/biden"
+      ]
+    },
+    "arn:aws:iam::200611803367:group/privesc-sre-group": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/privesc-sre-admin-policy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:group/privesc11-PutGroupPolicy-group": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:group/privesc8-AttachGroupPolicy-group": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:group/admin": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:group/biden": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ap-northeast-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ap-northeast-2": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ap-south-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ap-southeast-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ap-southeast-2": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_ca-central-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_eu-central-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_eu-north-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_eu-west-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_eu-west-2": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_eu-west-3": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_sa-east-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_us-east-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_us-east-2": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_us-west-1": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-EnableCRecording-1clff_us-west-2": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-StackSet-Local-AdministrationRole": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/AWS-QuickSetup-StackSet-Local-ExecutionRole": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AdministratorAccess_dc6414f7f2ab04fc": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_ViewOnlyAccess_0ace44bbc7092ea8": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/ssm.amazonaws.com/AWSServiceRoleForAmazonSSM": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/member.org.stacksets.cloudformation.amazonaws.com/AWSServiceRoleForCloudFormationStackSetsOrgMember": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/organizations.amazonaws.com/AWSServiceRoleForOrganizations": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/securityhub.amazonaws.com/AWSServiceRoleForSecurityHub": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/sso.amazonaws.com/AWSServiceRoleForSSO": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/aws-service-role/trustedadvisor.amazonaws.com/AWSServiceRoleForTrustedAdvisor": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fn1-privesc3-partial-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fn2-exploitableResourceConstraint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fn3-exploitableConditionConstraint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fn4-exploitableNotAction-role": {
+      "decision": "unknown",
+      "reasons": [
+        "relevant unsupported statement (conditions/negations/variables)"
+      ],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fp1-allow-and-deny-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fp2-allow-and-deny-multiple-policies-role": {
+      "decision": "deny",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/fp2-allow-all"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fp3-deny-iam-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fp4-nonExploitableResourceConstraint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/fp5-nonExploitableConditionConstraint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/OrganizationAccountAccessRole": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-AssumeRole-ending-role": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/privesc-AssumeRole-high-priv-policy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-AssumeRole-intermediate-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-AssumeRole-starting-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-CloudFormationUpdateStack-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-codeBuildCreateProjectPassRole-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-ec2InstanceConnect-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-high-priv-service-role": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/privesc-high-priv-service-policy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-permissive-role-trust": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-sageMakerCreateNotebookPassRole-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-sageMakerCreatePresignedNotebookURL-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-sageMakerCreateProcessingJobPassRole-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-sageMakerCreateTrainingJobPassRole-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-sre-role": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::200611803367:policy/privesc-sre-admin-policy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-ssmSendCommand-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc-ssmStartSession-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc1-CreateNewPolicyVersion-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc10-PutUserPolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc11-PutGroupPolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc12-PutRolePolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc13-AddUserToGroup-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc14-UpdatingAssumeRolePolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc15-PassExistingRoleToNewLambdaThenInvoke-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc16-PassRoleToNewLambdaThenTriggerWithNewDynamo-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc17-EditExistingLambdaFunctionWithRole-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc18-PassExistingRoleToNewGlueDevEndpoint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc19-UpdateExistingGlueDevEndpoint-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc2-SetExistingDefaultPolicyVersion-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc20-PassExistingRoleToCloudFormation-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc21-PassExistingRoleToNewDataPipeline-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc3-CreateEC2WithExistingInstanceProfile-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc4-CreateAccessKey-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc5-CreateLoginProfile-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc6-UpdateLoginProfile-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc7-AttachUserPolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc8-AttachGroupPolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/privesc9-AttachRolePolicy-role": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::200611803367:role/stacksets-exec-b5520cb2730c2f54b523d6375a319abb": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::aws:policy/AdministratorAccess"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:role/MyRole": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:role/MyOtherRole": {
+      "decision": "implicit_deny",
+      "reasons": [],
+      "allow_policies": [],
+      "missing_policies": [],
+      "inherited_groups": []
+    },
+    "arn:aws:iam::012345678901:role/OverprivilegedEC2": {
+      "decision": "allow",
+      "reasons": [],
+      "allow_policies": [
+        "arn:aws:iam::012345678901:policy/InsecurePolicy"
+      ],
+      "missing_policies": [],
+      "inherited_groups": []
+    }
+  },
+  "assumptions": [
+    "Untrusted identity is an operator-selected compromised user or role session.",
+    "Target is a concrete permission request, not evidence that a resource exists.",
+    "Only identity policies are evaluated; no resource policies, SCPs/RCPs or session policies.",
+    "Role trust/AssumeRole transitions are not imported or inferred.",
+    "Unknown identities are excluded; counts cover the supported projection only.",
+    "Permission carriers and role sessions are explicit schema adapters.",
+    "Applying changes only FalkorDB, never AWS."
+  ],
+  "source_sha256": "fb6f8b80e967606462ca189912996fc0e66b26c3f34a06514512d7d6e5bda610"
+}

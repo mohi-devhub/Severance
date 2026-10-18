@@ -9,15 +9,18 @@ The LLM plans and explains. Every path, count and score comes from a graph query
 Built for **Graph Hacks: Context for AI Agents**, powered by FalkorDB.
 **Track 01: Agents That Act on Connected Data.** Team: **pied-piper**.
 
-The project runs locally with synthetic IAM data. FalkorDB is the operational context layer:
+The project runs locally with seeded regression scenarios and a pinned public AWS IAM
+snapshot from Cloudsplaining. FalkorDB is the operational context layer:
 without it the agent cannot establish reachability, select a fix, simulate it, or apply it.
 
 For a quick review: [local setup](#run-it), [graph model](#graph-data-model),
-[essential queries](#queries-that-drive-the-agent), and [Track 01 evidence](#track-01-evidence).
+[essential queries](#queries-that-drive-the-agent), [public IAM results](#public-snapshot-benchmark),
+and [Track 01 evidence](#track-01-evidence).
 
 A scanner says *"prod-db is reachable."* This agent shows the 6-hop chain from a guest identity
-and the one policy that chain depends on. It also proves, before you approve anything, that
-detaching that policy closes the path and leaves every legitimate user's access intact.
+and the one policy that chain depends on. Before approval, a graph-copy simulation checks
+whether a proposed change closes the modeled exposure and preserves other callers'
+access to the assessed target. Changes apply to FalkorDB only.
 
 ## Track 01 evidence
 
@@ -38,10 +41,10 @@ session state; the model refers to them by `plan_id` rather than supplying edite
 | Label | Key properties | Meaning |
 |---|---|---|
 | `Principal` | `id`, `name`, `kind` | User, group, service, or untrusted external identity. Groups use the same label with `kind='group'`. |
-| `Role` | `id`, `name`, `trust` | An assumable role; `trust='broad'` identifies a broad-trust role. |
+| `Role` | `id`, `name`, `trust` | An assumable role in seeded scenarios; imported users/groups also use explicit permission-carrier adapters. |
 | `Policy` | `id`, `name`, `managed` | A managed or inline permission policy. |
 | `Action` | `id`, `name` | An action scoped to one resource, e.g. `iam:AttachRolePolicy@res-prod-db`. |
-| `Resource` | `id`, `name`, `type`, `sensitivity` | Bucket, database, cluster, secret, or queue. |
+| `Resource` | `id`, `name`, `type`, `sensitivity` | Seeded cloud resource, or one concrete action/resource permission request in an import. |
 
 | Relationship | Direction | Meaning |
 |---|---|---|
@@ -120,9 +123,109 @@ RETURN node.id AS id, score
 `$rel_types` contains the six relationship types above. The planner uses `GRAPH.COPY`
 to evaluate each candidate deletion and ranks the query-derived effects. After consent,
 the mutation is a parameterized `MATCH ... WHERE type(rel) = $ty DELETE rel` for one
-exact edge. All permissions and resources are synthetic; there is no cloud API call.
+exact edge. Public-snapshot imports use the same graph algorithms and approval gate.
+There is no AWS API call or AWS mutation.
 
-## Benchmark
+## Public IAM snapshot
+
+Severance also imports the [Cloudsplaining account-authorization example](https://github.com/salesforce/cloudsplaining/blob/f2ed0ba2ddf6457143203d46971c91ba236b6597/examples/files/example.json):
+**44 users, 5 groups, 78 roles and 84 managed policies**, plus inline policies. The
+unmodified input, pinned commit, checksum, upstream license and independently specified
+case expectations are checked in under [datasets/cloudsplaining](datasets/cloudsplaining/README.md).
+No AWS account or AWS credentials are needed.
+
+Each import assesses one concrete permission request, such as `s3:PutObject` on an
+example object in the source's `mybucket/*` resource pattern. The selected user or role
+session is **assumed compromised**; this is not a claim of anonymous internet access.
+The ARN remains the source ID. User/group policy attachments use a permission-carrier
+`Role`, and a role-session `Principal` represents a session of a source role. These are
+explicit graph adapters, not invented AWS roles or trust relationships. Reacher counts
+include modeled group principals and hypothetical role sessions, not just individual
+users or observed sessions. Resource sensitivity is an assessment default, not a source
+snapshot property.
+
+```mermaid
+flowchart LR
+    U["privesc-sre-user · assumed compromised"] -->|MEMBER_OF: proposed cut| G[privesc-sre-group]
+    G -->|HAS_ROLE: schema adapter| C["group permissions · carrier"]
+    C -->|GRANTS: source attachment| P[privesc-sre-admin-policy]
+    P -->|PERMITS: source s3 wildcard| A["s3:PutObject"]
+    A -->|TARGETS| R["permission request: mybucket/example.txt"]
+```
+
+The source attachment and group membership determine this five-edge explanation. FalkorDB
+finds the path, ranks its brokers and evaluates candidate cuts. The agent receives the
+finding and tool outputs; benchmark expectations are not passed to it.
+
+Run an investigation on the public input from the repository root after setup:
+
+```bash
+.venv/bin/severance import-iam datasets/cloudsplaining/example.json \
+  --action s3:PutObject \
+  --resource-arn arn:aws:s3:::mybucket/example.txt \
+  --untrusted-arn arn:aws:iam::012345678901:role/OverprivilegedEC2 \
+  --graph iam_public_review --output results/iam_import
+GRAPH_NAME=iam_public_review .venv/bin/severance investigate \
+  --finding-file results/iam_import.finding.json
+```
+
+The destination graph must be empty; use a fresh name to repeat an import. Import validation
+finishes before any graph writes. Review `results/iam_import.report.json` for coverage,
+unknown identities and assumptions. Approval changes the imported FalkorDB graph only.
+
+The importer supports unconditional identity-policy allows/denies, wildcard matching,
+default managed-policy versions, inline policies and inherited group policies. Applicable
+conditions, negations, policy variables, missing documents and permissions boundaries
+produce **unknown**; an unknown selected identity aborts the import. Other unknown
+identities are excluded from paths and listed in the report. Unknown is not a proven deny.
+Role trust transitions, resource policies, SCPs/RCPs, session policies and actual resource
+existence are outside this assessment. Collateral covers the single assessed permission
+among supported callers. See [full import semantics](datasets/cloudsplaining/README.md#import-semantics-and-limits).
+
+### Public-snapshot benchmark
+
+Six cases cover role-attached S3 write access, group-inherited write and ACL access,
+rejected approval, an explicit deny, and a deny in a separate attached policy.
+Each positive case has a manually specified source-derived path/fix expectation.
+Five engine repetitions per case measure exact paths, exact fixes and dry-run effects;
+one real Sonnet 5.5 MCP-agent call per case checks the complete workflow.
+
+**Measured on 2026-10-18: 30/30 engine evaluations and 6/6 full-agent investigations pass.**
+Positive cases simulate 1 → 0 untrusted reachers with zero collateral among supported
+principals. Approved runs delete exactly one graph edge; the rejection and deny controls
+preserve the graph. All six final agent runs complete without tool errors.
+
+| Case | Engine checks | Live agent | Path | Result |
+|---|---|---|---|---|
+| EC2 role: S3 write | 5/5 | 1/1 | 4 hops | Policy detached; assessed untrusted access closed |
+| Inherited group: S3 write | 5/5 | 1/1 | 5 hops | Membership removed; assessed untrusted access closed |
+| Inherited group: object ACL | 5/5 | 1/1 | 5 hops | Membership removed; assessed untrusted access closed |
+| Rejected approval | 5/5 | 1/1 | 4 hops | Graph unchanged |
+| Allow + deny in one policy | 5/5 | 1/1 | none | No remediation or mutation |
+| Allow + deny across policies | 5/5 | 1/1 | none | No remediation or mutation |
+
+[Full report](results/public_iam.md), [per-call checks, tool outputs and redacted audits](results/public_iam.json).
+Earlier runs are retained: [initial lookups](results/public_iam_initial.json),
+[quoted-name lookup](results/public_iam_lookup.json), and
+[benchmark graph collision](results/public_iam_isolation.json). The first two reached all
+expected task outcomes but each failed the stricter no-tool-errors check in one case.
+The third was invalidated in one case by a concurrent benchmark deleting its shared
+temporary graph. The final run follows fixes for exact resource-name handling and unique
+per-invocation graph names; earlier errors are not discarded.
+This small fixture check is not a production accuracy estimate or an LLM superiority claim.
+
+```bash
+# 30 engine evaluations and 6 paid full-agent investigations:
+.venv/bin/severance benchmark-public --engine-runs 5 --agent-runs 1
+# Same source-derived checks without paid calls:
+.venv/bin/severance benchmark-public --engine-runs 5 --agent-runs 0
+```
+
+Each call is checkpointed to `results/public_iam.json`; API/tool errors are recorded and
+the remaining cases continue. Every agent call imports a fresh isolated graph. The public
+benchmark leaves the earlier seeded comparison artifacts intact.
+
+## Seeded regression benchmarks
 
 `make bench` writes everything below to `results/`.
 
@@ -209,8 +312,9 @@ this measures that best case.
 3. **Everything is auditable.** `audit/<run_id>.jsonl` gets a record for every tool call, plan,
    dry-run, approval and apply. Records for a plan or a mutation must carry the justifying path,
    or the log refuses to write them.
-4. **Synthetic only.** The seeder plants known vulnerabilities, so the tests can assert exact
-   paths and fix edges. There is no cloud SDK and no live account.
+4. **Offline, scoped evidence.** Seeded fixtures provide exact regression truth. Public IAM
+   imports preserve source policy attachments and group memberships for one permission
+   request; unsupported cases are reported as unknown. There is no cloud SDK or AWS mutation.
 
 The approval token is there to make applying without approval structurally impossible. It is not
 meant to be cryptographically strong. Non-interactive runs reject by default.
@@ -246,12 +350,12 @@ If the runner-up ties on keys 1–3, the approval prompt shows it as an alternat
 ## Architecture
 
 ```
-cli/main.py ─ typer + rich: investigate · seed · graph-stats · benchmark · reset
+cli/main.py ─ investigate · import-iam · benchmark-public · seed · benchmark · reset
      │
 agent/runner.py ─ Claude Agent SDK loop, approver injected per run
 agent/tools.py  ─ 9 typed tools → in-process MCP server ("iam"), per-call audit
      │
-     ├── graph/       client (RO/RW, GRAPH.COPY context), schema, queries, seeder
+     ├── graph/       client (RO/RW, GRAPH.COPY context), schema, queries, seeder, IAM importer
      ├── scoring/     escalation paths, blast radius, severity
      ├── remediation/ planner · dryrun · token-gated apply
      └── audit/       append-only JSONL
@@ -307,14 +411,16 @@ This submission enters **Track 01 only**. It demonstrates decisions and actions 
 connected IAM data; it does not implement cross-session conversational memory,
 multi-agent coordination, or a company knowledge graph.
 
-The data is entirely synthetic, with four planted scenarios. Exact-edge benchmark
-accuracy checks the declared ranking policy, and the query scale test uses disconnected
-decoys; neither is a claim of production cloud coverage. Shortest paths are the
+Four seeded scenarios provide regression ground truth. A separate benchmark imports a
+pinned, publicly maintained Cloudsplaining example snapshot. This is external fixture
+data, not a verified production-account export. Exact-edge benchmark accuracy checks
+the declared ranking policy, and the query scale test uses disconnected decoys; neither
+is a claim of production cloud coverage. Shortest paths are the
 explanations shown, rather than an enumeration of every possible exploit path.
 
 **AI coding disclosure:** Claude Code assisted the initial implementation. OpenAI Codex
 assisted with benchmark recovery, failure handling, tests, documentation, build/CI,
-and submission preparation. All reported benchmark numbers come from recorded runs;
+submission preparation, and the public IAM importer/benchmark. All reported benchmark numbers come from recorded runs;
 deterministic tests and live approve/reject
 agent tests verify the implementation. The model selects tools and explains their outputs;
 it is not the source of graph facts or scores.

@@ -21,3 +21,13 @@
 - The public repository is accessible without authentication. The README maps the graph
   and explains where FalkorDB supplies the agent's decisions; it contains no demo section.
 - Video recording/editing and submission through the event form remain with the project owner.
+
+## Public IAM snapshot follow-up
+
+- [x] Vendor the unchanged Cloudsplaining snapshot with pinned revision, checksum and license.
+- [x] Add scoped IAM import, explicit compromised-identity assumptions, deny/unknown handling.
+- [x] Add public snapshot engine/MCP-agent benchmark and preserve early lookup-error runs.
+- [x] Verify 113 deterministic tests, lint/format and wheel/source build.
+- [x] Add source-derived expectations, import commands, graph mapping and measured results.
+- Final public-snapshot run passes 30/30 engine evaluations and 6/6 full-agent calls,
+  without tool errors; approved writes, rejection and explicit-deny controls all match.

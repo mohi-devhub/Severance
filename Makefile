@@ -1,5 +1,5 @@
 BIN ?= .venv/bin/
-.PHONY: setup up seed demo test test-agent lint bench bench-engine
+.PHONY: setup up seed demo test test-agent lint bench bench-engine bench-public
 
 setup:
 	uv sync --locked --all-extras
@@ -20,3 +20,5 @@ bench:
 	$(BIN)severance benchmark
 bench-engine:
 	$(BIN)severance benchmark --llm-runs 0
+bench-public:
+	$(BIN)severance benchmark-public

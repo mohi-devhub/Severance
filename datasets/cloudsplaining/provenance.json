@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/salesforce/cloudsplaining",
+  "commit": "f2ed0ba2ddf6457143203d46971c91ba236b6597",
+  "path": "examples/files/example.json",
+  "sha256": "fb6f8b80e967606462ca189912996fc0e66b26c3f34a06514512d7d6e5bda610",
+  "license": "BSD-3-Clause; see LICENSE",
+  "retrieved_at": "2026-10-18",
+  "description": "Unmodified public example fixture; mixed training/example account data, not a verified production export."
+}

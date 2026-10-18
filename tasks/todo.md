@@ -20,7 +20,8 @@
 - The project, Python package and CLI are named Severance (`severance`).
 - The public repository is accessible without authentication. The README maps the graph
   and explains where FalkorDB supplies the agent's decisions; it contains no demo section.
-- Video recording/editing and submission through the event form remain with the project owner.
+- The owner provided the final recording; it is linked in SUBMISSION.md. Event-form
+  submission remains with the project owner.
 
 ## Public IAM snapshot follow-up
 
@@ -31,3 +32,5 @@
 - [x] Add source-derived expectations, import commands, graph mapping and measured results.
 - Final public-snapshot run passes 30/30 engine evaluations and 6/6 full-agent calls,
   without tool errors; approved writes, rejection and explicit-deny controls all match.
+- [x] Verify and publish the owner's unchanged recording as a release asset, with
+  source checksum and submission-note links; preserve the video-free README.

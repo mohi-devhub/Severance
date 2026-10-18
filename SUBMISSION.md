@@ -56,15 +56,27 @@ AWS effective-permission analysis. All changes remain inside FalkorDB.
   benchmark and raw evidence are in [public_iam.md](results/public_iam.md) and
   [public_iam.json](results/public_iam.json). Earlier lookup-error runs are retained.
 
+## Working demonstration
+
+The owner-provided [Severance recording](https://github.com/mohi-devhub/Severance/releases/tag/graph-hacks-demo-2026-10-18)
+is available publicly, with a [direct MP4 download](https://github.com/mohi-devhub/Severance/releases/download/graph-hacks-demo-2026-10-18/Severance-demo.mp4).
+The unchanged 82-second, 1920 × 1080 recording shows:
+
+- A seeded six-hop escalation investigation, simulation, approval, graph change and audit.
+- A public Cloudsplaining IAM snapshot import and a second complete investigation,
+  including permission-path evidence, simulation, human approval and application.
+
+The release includes the file's SHA-256. All demonstrated changes apply to FalkorDB,
+not to an AWS account. The README remains video-free at the project owner's request.
+
 ## Event submission
 
 The [official rules](https://www.wemakedevs.org/hackathons/falkordb/rules) require public
 source, graph-model and setup documentation, essential queries or algorithms, named
 tracks, disclosure of AI assistance, and a working demonstration.
 
-Video recording and editing are handled by the project owner and are outside this
-update. Submit the source link, select **Track 01**, and provide the owner's working
-demonstration in the event form. Review the graph schema, queries, ranking policy,
+Submit the source link, select **Track 01**, and provide the recording linked above
+in the event form. Review the graph schema, queries, ranking policy,
 approval gate and benchmark limitations so the team can explain the implementation.
 
 The advertised deadline is October 18, 2026, 11:59 PM IST. Form submission and
